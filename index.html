@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Farm Desk — SA farm ops demo for Free State / Highveld. Sample data only. NOT veterinary, legal, tax, financial or agronomist advice." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Farm Desk · Plaas ops</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2384cc16'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='sans-serif' font-weight='800' fill='%2314532d'%3EFD%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">FD</div>
+        <div class="brand-text">
+          <h1>Farm Desk</h1>
+          <p>Plaas Sonder Naam · Free State</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="icon-btn" id="btn-reset" title="Reset demo" aria-label="Reset demo">↺</button>
+        <button type="button" class="icon-btn" id="btn-info" title="About" aria-label="About">ℹ</button>
+      </div>
+    </header>
+
+    <main class="main" id="main">
+      <!-- HOME / DASHBOARD -->
+      <section class="view active" id="view-home" data-view="home">
+        <div class="view-title">
+          <div>
+            <h2>Home</h2>
+            <p class="sub">Ops queue · <span id="today-date"></span></p>
+          </div>
+          <span class="badge teal" id="today-count"><span class="dot"></span> 0 due</span>
+        </div>
+
+        <div class="grid grid-3 mb-12" id="weather-snap"></div>
+
+        <div class="card mb-12">
+          <div class="card-head">
+            <h3>Today queue</h3>
+            <span class="badge muted">plant · graze · inject · repair</span>
+          </div>
+          <div class="list" id="today-queue"></div>
+        </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Alerts</h3><span class="badge warn" id="alerts-badge">—</span></div>
+          <div class="list" id="alerts-list"></div>
+        </div>
+
+        <p class="disclaimer">NOT veterinary advice · NOT legal/tax/financial advice · NOT an agronomist prescription. Schedules &amp; checklists are educational ops aids — confirm with a qualified vet, agronomist or lawyer. Demo / sample data only.</p>
+      </section>
+
+      <!-- CROPS -->
+      <section class="view" id="view-crops" data-view="crops">
+        <div class="view-title">
+          <div>
+            <h2>Crops</h2>
+            <p class="sub">Kampe · plant windows · soil logs</p>
+          </div>
+        </div>
+
+        <div class="tabs" id="crops-tabs">
+          <button type="button" class="tab active" data-ctab="fields">Kampe</button>
+          <button type="button" class="tab" data-ctab="planner">Planner</button>
+          <button type="button" class="tab" data-ctab="fert">Fertilise</button>
+          <button type="button" class="tab" data-ctab="soil">Soil logs</button>
+        </div>
+
+        <div id="crops-panel-fields">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Fields / kampe</h3><span class="badge teal" id="fields-ha">—</span></div>
+            <div class="list" id="fields-list"></div>
+          </div>
+        </div>
+
+        <div id="crops-panel-planner" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>What · where · when</h3><span class="badge muted">sample</span></div>
+            <div class="list" id="planner-list"></div>
+          </div>
+        </div>
+
+        <div id="crops-panel-fert" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Fertiliser timing reminders</h3><span class="badge warn">ops aid</span></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Reminders only — not a product prescription. Confirm rates with an agronomist.</p>
+            <div class="list" id="fert-list"></div>
+          </div>
+        </div>
+
+        <div id="crops-panel-soil" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Add soil / moisture log</h3></div>
+            <div class="form-row"><label>Kamp / field</label>
+              <select id="soil-field"></select>
+            </div>
+            <div class="form-row"><label>Moisture note</label>
+              <input type="text" id="soil-moisture" placeholder="e.g. Adequate after rain" />
+            </div>
+            <div class="form-row"><label>Quality / observation</label>
+              <textarea id="soil-note" placeholder="User-entered observation…"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary btn-block" id="btn-soil-log">Save soil log</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Recent soil logs</h3></div>
+            <div class="list" id="soil-logs"></div>
+          </div>
+        </div>
+        <p class="disclaimer">NOT an agronomist prescription · Demo sample data · Confirm fertiliser &amp; plant decisions with a qualified adviser.</p>
+      </section>
+
+      <!-- ANIMALS / LIVESTOCK -->
+      <section class="view" id="view-animals" data-view="animals">
+        <div class="view-title">
+          <div>
+            <h2>Animals</h2>
+            <p class="sub">Vee · wild · grazing · inject reminders</p>
+          </div>
+        </div>
+
+        <div class="tabs" id="animals-tabs">
+          <button type="button" class="tab active" data-atab="herd">Herd</button>
+          <button type="button" class="tab" data-atab="capacity">Capacity</button>
+          <button type="button" class="tab" data-atab="graze">Graze</button>
+          <button type="button" class="tab" data-atab="feed">Feed</button>
+          <button type="button" class="tab" data-atab="inject">Inject</button>
+        </div>
+
+        <div id="animals-panel-herd">
+          <div class="grid grid-2 mb-12" id="herd-kpis"></div>
+          <div class="card mb-12">
+            <div class="card-head"><h3>Headcounts by species</h3></div>
+            <div class="list" id="herd-list"></div>
+          </div>
+        </div>
+
+        <div id="animals-panel-capacity" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Carrying capacity</h3><span class="badge muted">sample table</span></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Simple ha × stocking rate. Adjust rates to your veld — educational only.</p>
+            <div class="form-row"><label>Grazing area (ha)</label>
+              <input type="number" id="cap-ha" inputmode="decimal" step="0.1" />
+            </div>
+            <div class="form-row"><label>Species / rate basis</label>
+              <select id="cap-species"></select>
+            </div>
+            <div class="form-row"><label>Stocking rate (LSU / ha) — editable</label>
+              <input type="number" id="cap-rate" inputmode="decimal" step="0.01" />
+            </div>
+            <div class="calc-box">
+              <div style="font-size:12px;color:var(--muted)">Estimated LSU capacity</div>
+              <div class="calc-result" id="cap-result">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px" id="cap-compare"></div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-block" id="btn-cap-save" style="margin-top:10px">Save rate to demo table</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Sample stocking rates</h3></div>
+            <div class="list" id="rate-table"></div>
+          </div>
+        </div>
+
+        <div id="animals-panel-graze" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Grazing rotations</h3><span class="badge teal">kampe</span></div>
+            <div class="list" id="graze-list"></div>
+          </div>
+        </div>
+
+        <div id="animals-panel-feed" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Feed &amp; supplies</h3></div>
+            <div class="list" id="feed-list"></div>
+          </div>
+        </div>
+
+        <div id="animals-panel-inject" class="hidden">
+          <div class="card mb-12">
+            <div class="card-head"><h3>Injection / vaccination reminders</h3><span class="badge danger">no dosages</span></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Due-date reminders only. You enter the product name when logging. <strong>NOT veterinary advice — no dosages or medical protocols.</strong></p>
+            <div class="list" id="inject-list"></div>
+          </div>
+          <div class="card mb-12">
+            <div class="card-head"><h3>Log dose given</h3></div>
+            <div class="form-row"><label>Reminder</label>
+              <select id="log-inject-id"></select>
+            </div>
+            <div class="form-row"><label>Product used (you enter)</label>
+              <input type="text" id="log-inject-product" placeholder="e.g. brand / vaccine name" />
+            </div>
+            <div class="form-row"><label>Notes (optional)</label>
+              <input type="text" id="log-inject-note" placeholder="Batch, animal group…" />
+            </div>
+            <button type="button" class="btn btn-primary btn-block" id="btn-log-inject">Mark given</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Treatment log</h3></div>
+            <div class="list" id="treatment-log"></div>
+          </div>
+        </div>
+        <p class="disclaimer">NOT veterinary advice · Reminder schedules are educational ops aids · Confirm all animal health decisions with a qualified veterinarian.</p>
+      </section>
+
+      <!-- MONEY -->
+      <section class="view" id="view-money" data-view="money">
+        <div class="view-title">
+          <div>
+            <h2>Money</h2>
+            <p class="sub">Income · expense · cash (ZAR)</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2 mb-12">
+          <div class="card kpi">
+            <div class="stat-value green" id="money-in">R0</div>
+            <div class="stat-label">Income (month)</div>
+          </div>
+          <div class="card kpi">
+            <div class="stat-value amber" id="money-out">R0</div>
+            <div class="stat-label">Expenses (month)</div>
+          </div>
+        </div>
+        <div class="card kpi mb-12">
+          <div class="stat-value teal" id="money-cash">R0</div>
+          <div class="stat-label">Cash overview (demo)</div>
+        </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Income</h3></div>
+          <div class="list" id="income-list"></div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Expenses</h3></div>
+          <div class="list" id="expense-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Buying / planned purchases</h3></div>
+          <div class="list" id="buying-list"></div>
+        </div>
+        <p class="disclaimer">NOT financial or tax advice · Demo ZAR figures only · Confirm with your bookkeeper / accountant.</p>
+      </section>
+
+      <!-- MORE hub -->
+      <section class="view" id="view-more" data-view="more">
+        <div class="view-title">
+          <div>
+            <h2>More</h2>
+            <p class="sub">Weather · stock · infra · admin · HR</p>
+          </div>
+        </div>
+        <div class="more-grid" id="more-grid"></div>
+        <p class="disclaimer">Demo modules · Reset anytime from Settings or ↺</p>
+      </section>
+
+      <!-- WEATHER -->
+      <section class="view" id="view-weather" data-view="weather">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Weather &amp; seasons</h2>
+            <p class="sub">Highveld sample · not live API</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Pattern cards</h3><span class="badge info">placeholder API</span></div>
+          <div class="grid" id="weather-cards" style="gap:10px"></div>
+          <p style="font-size:11px;color:var(--muted);margin-top:10px">Static sample for Free State / Highveld. Live weather API hook can replace this later.</p>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Seasonal calendar</h3><span class="badge teal">Highveld-style</span></div>
+          <div id="season-calendar"></div>
+        </div>
+        <p class="disclaimer">Sample climate notes only · Not a forecast service · Confirm frost &amp; planting with local advisers.</p>
+      </section>
+
+      <!-- STOCK -->
+      <section class="view" id="view-stock" data-view="stock">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Stock &amp; supplies</h2>
+            <p class="sub">Inventory · reorder · purchases</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Inventory</h3><span class="badge" id="stock-low-badge">—</span></div>
+          <div class="list" id="stock-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Purchase log</h3></div>
+          <div class="list" id="purchase-list"></div>
+        </div>
+        <p class="disclaimer">Demo inventory · Not a procurement or chemical advisory tool.</p>
+      </section>
+
+      <!-- MONITORING -->
+      <section class="view" id="view-monitor" data-view="monitor">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Monitoring</h2>
+            <p class="sub">Health notes · photo stubs · tasks</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Add health / field note</h3></div>
+          <div class="form-row"><label>Area</label>
+            <select id="mon-area">
+              <option value="crop">Crop</option>
+              <option value="livestock">Livestock</option>
+              <option value="infra">Infrastructure</option>
+            </select>
+          </div>
+          <div class="form-row"><label>Note</label>
+            <textarea id="mon-note" placeholder="Observation…"></textarea>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="btn-mon-add">Save note (+ photo stub)</button>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Notes</h3></div>
+          <div class="list" id="mon-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Tasks due</h3></div>
+          <div class="list" id="mon-tasks"></div>
+        </div>
+        <p class="disclaimer">NOT veterinary or agronomist advice · User-entered notes only.</p>
+      </section>
+
+      <!-- INFRA / REPAIRS -->
+      <section class="view" id="view-infra" data-view="infra">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Repairs &amp; infra</h2>
+            <p class="sub">Fences · pumps · vehicles · sheds</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Infrastructure register</h3></div>
+          <div class="list" id="infra-list"></div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Repair tickets</h3><span class="badge warn" id="repair-badge">—</span></div>
+          <div class="list" id="repair-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>New repair ticket</h3></div>
+          <div class="form-row"><label>Asset</label>
+            <select id="repair-asset"></select>
+          </div>
+          <div class="form-row"><label>Issue</label>
+            <input type="text" id="repair-issue" placeholder="e.g. Broken dropper on west fence" />
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="btn-repair-add">Open ticket</button>
+        </div>
+        <p class="disclaimer">Demo ops register · Confirm safety-critical work with qualified tradespeople.</p>
+      </section>
+
+      <!-- ADMIN -->
+      <section class="view" id="view-admin" data-view="admin">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Admin &amp; budget</h2>
+            <p class="sub">Cash sketch · buying · overview</p>
+          </div>
+        </div>
+        <div class="grid grid-2 mb-12">
+          <div class="card kpi">
+            <div class="stat-value teal" id="admin-ha">—</div>
+            <div class="stat-label">Total hectares</div>
+          </div>
+          <div class="card kpi">
+            <div class="stat-value green" id="admin-head">—</div>
+            <div class="stat-label">Total vee head</div>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Budget snapshot (ZAR)</h3></div>
+          <div id="admin-budget"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Quick links</h3></div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost" data-nav="money">Money</button>
+            <button type="button" class="btn btn-ghost" data-nav="stock">Stock</button>
+          </div>
+        </div>
+        <p class="disclaimer">NOT tax or financial advice · Demo figures.</p>
+      </section>
+
+      <!-- CONTACTS -->
+      <section class="view" id="view-contacts" data-view="contacts">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Contacts</h2>
+            <p class="sub">Vets · suppliers · brokers · buyers</p>
+          </div>
+        </div>
+        <div class="chip-row" id="contact-filters"></div>
+        <div class="list" id="contacts-list"></div>
+        <p class="disclaimer">Sample contacts only · Not endorsements.</p>
+      </section>
+
+      <!-- LEGAL -->
+      <section class="view" id="view-legal" data-view="legal">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Legal</h2>
+            <p class="sub">Licences · POPIA · checklist</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Licence / permit renewals</h3><span class="badge warn">sample</span></div>
+          <div class="list" id="legal-renewals"></div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>POPIA note</h3></div>
+          <p style="font-size:13px;color:var(--text-dim)">Farm Desk demo stores sample ops data in your browser localStorage only. If you handle worker or buyer personal information in a real system, process it lawfully under POPIA — appoint an information officer where required, minimise data, and secure access. This note is educational, not legal advice.</p>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Compliance checklist</h3><span class="badge muted">not legal advice</span></div>
+          <div id="legal-checklist"></div>
+        </div>
+        <p class="disclaimer">NOT legal advice · Confirm licences, labour and land-use compliance with a qualified attorney / authority.</p>
+      </section>
+
+      <!-- HR -->
+      <section class="view" id="view-hr" data-view="hr">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>HR &amp; people</h2>
+            <p class="sub">Roster · skof · leave · payroll Approve</p>
+          </div>
+        </div>
+
+        <div class="approve-card mb-12" id="payroll-approve">
+          <h3>Approve payroll</h3>
+          <p id="payroll-copy">Payslips prepared for next pay day. App prepared — you confirm pay.</p>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost" id="btn-payroll-later">Later</button>
+            <button type="button" class="btn btn-amber" id="btn-payroll-approve">Approve pay</button>
+          </div>
+        </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Roster / roles</h3><span class="badge teal" id="hr-count">0</span></div>
+          <div class="list" id="hr-list"></div>
+        </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Time clock / skof</h3></div>
+          <div class="list" id="skof-list"></div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="btn-clock-in">Clock in</button>
+            <button type="button" class="btn btn-ghost" id="btn-clock-out">Clock out</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Leave</h3></div>
+          <div class="list" id="leave-list"></div>
+        </div>
+        <p class="disclaimer">NOT labour / DoEL advice · Demo roster · Confirm BCEA/UIF with qualified advisers.</p>
+      </section>
+
+      <!-- TODO -->
+      <section class="view" id="view-todo" data-view="todo">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>To-do</h2>
+            <p class="sub">Farm-wide auto + manual</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Add task</h3></div>
+          <div class="form-row"><label>Task</label>
+            <input type="text" id="todo-text" placeholder="e.g. Check windpomp at dam" />
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="btn-todo-add">Add task</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>All tasks</h3><span class="badge" id="todo-badge">—</span></div>
+          <div class="list" id="todo-list"></div>
+        </div>
+        <p class="disclaimer">Ops checklist only · Demo data.</p>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings" data-view="settings">
+        <button type="button" class="back-link" data-nav="more">← More</button>
+        <div class="view-title">
+          <div>
+            <h2>Settings</h2>
+            <p class="sub">Demo · localStorage</p>
+          </div>
+        </div>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Farm</h3></div>
+          <p style="font-size:13px" id="settings-farm"></p>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Demo</h3></div>
+          <button type="button" class="btn btn-danger btn-block" id="btn-reset-2">Reset all demo data</button>
+        </div>
+        <p class="disclaimer">All data stays in this browser’s localStorage · Faceless SA ZAR demo.</p>
+      </section>
+    </main>
+
+    <nav class="nav" id="bottom-nav" aria-label="Primary">
+      <button type="button" class="active" data-nav="home"><span class="nav-ico" aria-hidden="true">◎</span>Home</button>
+      <button type="button" data-nav="crops"><span class="nav-ico" aria-hidden="true">🌾</span>Crops</button>
+      <button type="button" data-nav="animals"><span class="nav-ico" aria-hidden="true">🐄</span>Animals</button>
+      <button type="button" data-nav="money"><span class="nav-ico" aria-hidden="true">R</span>Money</button>
+      <button type="button" data-nav="more"><span class="nav-ico" aria-hidden="true">☰</span>More</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <div class="modal-backdrop" id="modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title">About</h3>
+      <div id="modal-body"></div>
+      <button type="button" class="btn btn-primary btn-block" id="modal-close" style="margin-top:12px">Close</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -33,7 +33,7 @@
         <div class="view-title">
           <div>
             <h2>Home</h2>
-            <p class="sub">Ops queue · <span id="today-date"></span></p>
+            <p class="sub">Guided ops processes · <span id="today-date"></span></p>
           </div>
           <span class="badge teal" id="today-count"><span class="dot"></span> 0 due</span>
         </div>
@@ -42,8 +42,8 @@
 
         <div class="card mb-12">
           <div class="card-head">
-            <h3>Today queue</h3>
-            <span class="badge muted">plant · graze · inject · repair</span>
+            <h3>Due processes</h3>
+            <span class="badge muted">tap to run wizard</span>
           </div>
           <div class="list" id="today-queue"></div>
         </div>
@@ -53,7 +53,16 @@
           <div class="list" id="alerts-list"></div>
         </div>
 
-        <p class="disclaimer">NOT veterinary advice · NOT legal/tax/financial advice · NOT an agronomist prescription. Schedules &amp; checklists are educational ops aids — confirm with a qualified vet, agronomist or lawyer. Demo / sample data only.</p>
+        <div class="card mb-12">
+          <div class="card-head"><h3>Recent completions</h3><span class="badge muted">history</span></div>
+          <div id="history-panel"></div>
+        </div>
+
+        <div class="btn-row mb-12">
+          <button type="button" class="btn btn-ghost btn-block" id="btn-add-process-home">+ Add recurring process</button>
+        </div>
+
+        <p class="disclaimer">NOT veterinary advice · NOT legal/tax/financial advice · NOT an agronomist prescription. Guided wizards are educational ops aids — confirm with a qualified vet, agronomist or lawyer. Demo / sample data only.</p>
       </section>
 
       <!-- CROPS -->
@@ -511,11 +520,24 @@
           <div class="card-head"><h3>Farm</h3></div>
           <p style="font-size:13px" id="settings-farm"></p>
         </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Recurring processes</h3><span class="badge teal">wizard</span></div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Fertilise, inject reminders, soil checks, stock take, repairs — each opens a guided process with optional account links (vet WhatsApp, supplier, co-op).</p>
+          <div class="list" id="process-list"></div>
+          <button type="button" class="btn btn-primary btn-block" id="btn-add-process" style="margin-top:10px">+ Add process</button>
+        </div>
+
+        <div class="card mb-12">
+          <div class="card-head"><h3>Completion history</h3></div>
+          <div id="history-list-full"></div>
+        </div>
+
         <div class="card">
           <div class="card-head"><h3>Demo</h3></div>
           <button type="button" class="btn btn-danger btn-block" id="btn-reset-2">Reset all demo data</button>
         </div>
-        <p class="disclaimer">All data stays in this browser’s localStorage · Faceless SA ZAR demo.</p>
+        <p class="disclaimer">All data stays in this browser’s localStorage · Faceless SA ZAR demo · NOT vet/tax/legal advice.</p>
       </section>
     </main>
 
@@ -535,6 +557,21 @@
       <h3 id="modal-title">About</h3>
       <div id="modal-body"></div>
       <button type="button" class="btn btn-primary btn-block" id="modal-close" style="margin-top:12px">Close</button>
+    </div>
+  </div>
+
+  
+  <!-- ProcessRunner wizard -->
+  <div class="pr-overlay" id="process-runner" aria-hidden="true">
+    <div class="pr-sheet" role="dialog" aria-modal="true" aria-labelledby="pr-title">
+      <div class="pr-head">
+        <button type="button" class="icon-btn" id="pr-close" aria-label="Close wizard">✕</button>
+        <h3 id="pr-title">Process</h3>
+        <span class="badge muted" id="pr-badge">1/1</span>
+      </div>
+      <div class="pr-stepper" id="pr-stepper" aria-hidden="true"></div>
+      <div class="pr-body" id="pr-body"></div>
+      <div class="pr-actions" id="pr-actions"></div>
     </div>
   </div>
 

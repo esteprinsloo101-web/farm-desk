@@ -5,8 +5,107 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "farm-desk-v1";
+  const STORAGE_KEY = "farm-desk-v2";
   const TZ = "Africa/Johannesburg";
+
+  /* ── Process types (guided wizards, not checklists) ── */
+  const PROCESS_TYPES = {
+    fertilise: {
+      label: "Fertilise",
+      icon: "🪴",
+      defaultCadenceDays: 45,
+      leadDays: 7,
+      disclaimer: "NOT an agronomist prescription. Confirm rates with a qualified adviser.",
+      steps: [
+        { key: "field", title: "Confirm field / crop", body: "Check kamp, crop stage and weather window before applying anything." },
+        { key: "product", title: "Note product used", body: "Enter the product you chose (ops log only — not a prescription).", input: "product" },
+        { key: "confirm", title: "Confirm applied", body: "Mark when fertiliser work is done.", checks: ["Fertilise pass completed"] },
+      ],
+    },
+    inject_reminder: {
+      label: "Inject reminder log",
+      icon: "💉",
+      defaultCadenceDays: 90,
+      leadDays: 7,
+      disclaimer: "NOT veterinary advice. No dosages stored. Confirm with your vet.",
+      steps: [
+        { key: "animals", title: "Confirm animals / group", body: "Identify the herd/flock this reminder is for." },
+        { key: "product", title: "Log product (user-entered)", body: "Enter brand/product YOU used after vet guidance. App stores no dosage.", input: "product" },
+        { key: "confirm", title: "Confirm logged", body: "Mark reminder handled.", checks: ["Treatment logged · vet guidance followed"] },
+      ],
+    },
+    soil_check: {
+      label: "Soil / moisture check",
+      icon: "🌱",
+      defaultCadenceDays: 14,
+      leadDays: 3,
+      disclaimer: "Educational ops aid — not a lab soil test.",
+      steps: [
+        { key: "walk", title: "Walk the kamp", body: "Observe moisture, crusting, emergence." },
+        { key: "log", title: "Log observation", body: "Record moisture note and quality.", input: "note" },
+        { key: "confirm", title: "Confirm logged", body: "Save soil check.", checks: ["Soil check logged"] },
+      ],
+    },
+    stock_take: {
+      label: "Stock take",
+      icon: "📦",
+      defaultCadenceDays: 30,
+      leadDays: 5,
+      disclaimer: "Ops count only — demo quantities.",
+      steps: [
+        { key: "count", title: "Count critical stock", body: "Check diesel, feed, fence gear, PPE against reorder levels." },
+        { key: "note", title: "Note shortages", body: "List what to reorder.", input: "note" },
+        { key: "confirm", title: "Confirm stock take", body: "Mark cycle complete.", checks: ["Stock take completed"] },
+      ],
+    },
+    repair_close: {
+      label: "Repair close-out",
+      icon: "🔧",
+      defaultCadenceDays: 0,
+      leadDays: 365,
+      disclaimer: "Ops ticket close — not a contractor warranty.",
+      steps: [
+        { key: "work", title: "Describe work done", body: "What was fixed?", input: "note" },
+        { key: "confirm", title: "Close ticket", body: "Mark repair done. Optional follow-up due date next.", checks: ["Repair completed / verified"] },
+      ],
+    },
+    graze_move: {
+      label: "Graze move",
+      icon: "🐄",
+      defaultCadenceDays: 14,
+      leadDays: 5,
+      disclaimer: "Grazing aid only — adjust to your veld.",
+      steps: [
+        { key: "plan", title: "Confirm next kamp", body: "Check water, fence and rest period." },
+        { key: "move", title: "Move herd", body: "Complete the move / open gate as planned." },
+        { key: "confirm", title: "Confirm moved", body: "Set next move date from cadence.", checks: ["Herd moved / rest started"] },
+      ],
+    },
+    plant_window: {
+      label: "Plant / scout window",
+      icon: "🌾",
+      defaultCadenceDays: 60,
+      leadDays: 10,
+      disclaimer: "NOT an agronomist prescription. Confirm plant decisions with a qualified adviser.",
+      steps: [
+        { key: "window", title: "Check plant window", body: "Confirm soil temp, moisture and seed availability." },
+        { key: "do", title: "Plant or scout", body: "Do the field work for this window." },
+        { key: "confirm", title: "Confirm done", body: "Log completion.", checks: ["Plant / scout action completed"] },
+      ],
+    },
+    custom: {
+      label: "Custom farm process",
+      icon: "◎",
+      defaultCadenceDays: 30,
+      leadDays: 5,
+      disclaimer: "Demo process — adapt to your plaas.",
+      steps: [
+        { key: "do", title: "Do the work", body: "Follow your farm SOP for this item." },
+        { key: "confirm", title: "Confirm done", body: "Mark complete.", checks: ["Work completed"] },
+      ],
+    },
+  };
+
 
   function seed() {
     const today = startOfDay(new Date());
@@ -161,8 +260,64 @@
         { id: "td4", text: "Order trough floats", source: "manual", done: false, due: isoDate(addDays(today, 7)) },
       ],
       contactFilter: "all",
+      processes: seedProcesses(today),
+      history: [],
     };
   }
+
+  function seedProcesses(today) {
+    return [
+      {
+        id: "pr-fert1", type: "fertilise", title: "Top-dress N — Kamp Noord",
+        nextDue: isoDate(addDays(today, 5)), cadenceDays: 45, leadDays: 7, module: "crops",
+        accountLinks: [{ label: "Feed / fert co-op", url: "https://www.google.com/search?q=Highveld+Feed+Co-op" }],
+        meta: { fertId: "fr1", field: "Kamp Noord" },
+      },
+      {
+        id: "pr-plant3", type: "plant_window", title: "Sunflower scout — Kamp Suid",
+        nextDue: isoDate(addDays(today, 2)), cadenceDays: 21, leadDays: 5, module: "crops",
+        accountLinks: [{ label: "Seed merchant FS", url: "https://www.google.com/search?q=Free+State+seed+merchant" }],
+        meta: { plannerId: "p3" },
+      },
+      {
+        id: "pr-inj2", type: "inject_reminder", title: "Sheep — seasonal parasite reminder",
+        nextDue: isoDate(addDays(today, 1)), cadenceDays: 90, leadDays: 7, module: "animals",
+        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
+        meta: { injectId: "inj2" },
+      },
+      {
+        id: "pr-inj4", type: "inject_reminder", title: "Pigs — herd health schedule reminder",
+        nextDue: isoDate(addDays(today, -2)), cadenceDays: 60, leadDays: 7, module: "animals",
+        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
+        meta: { injectId: "inj4" },
+      },
+      {
+        id: "pr-soil", type: "soil_check", title: "Soil check — Kamp Noord",
+        nextDue: isoDate(addDays(today, 2)), cadenceDays: 14, leadDays: 3, module: "crops",
+        accountLinks: [],
+        meta: { fieldId: "f1", fieldName: "Kamp Noord" },
+      },
+      {
+        id: "pr-stock", type: "stock_take", title: "Monthly stock take",
+        nextDue: isoDate(addDays(today, 4)), cadenceDays: 30, leadDays: 5, module: "stock",
+        accountLinks: [{ label: "Farm chandlery", url: "https://www.google.com/search?q=farm+chandlery+Bloemfontein" }],
+        meta: {},
+      },
+      {
+        id: "pr-rep1", type: "repair_close", title: "Repair: West boundary fence",
+        nextDue: isoDate(today), cadenceDays: 0, leadDays: 60, module: "infra",
+        accountLinks: [{ label: "Supplier — fence gear", url: "https://www.google.com/search?q=fence+droppers+supplier" }],
+        meta: { repairId: "r1" },
+      },
+      {
+        id: "pr-graze1", type: "graze_move", title: "Graze move — Weiding A (cattle)",
+        nextDue: isoDate(addDays(today, 3)), cadenceDays: 14, leadDays: 5, module: "animals",
+        accountLinks: [],
+        meta: { grazeId: "g1" },
+      },
+    ];
+  }
+
 
   /* ── date helpers ── */
   function startOfDay(d) {
@@ -223,7 +378,12 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return seed();
-      return JSON.parse(raw);
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data.processes) || !data.processes.length) {
+        data.processes = seedProcesses(startOfDay(new Date()));
+      }
+      if (!Array.isArray(data.history)) data.history = [];
+      return data;
     } catch {
       return seed();
     }
@@ -237,100 +397,39 @@
   let cropsTab = "fields";
   let animalsTab = "herd";
 
-  /* ── queue / alerts ── */
+  /* ── queue / alerts (actionable processes) ── */
+  function processDue(p) {
+    return daysUntil(p.nextDue);
+  }
+  function processInQueue(p) {
+    if (p.paused) return false;
+    const lead = p.leadDays != null ? p.leadDays : (PROCESS_TYPES[p.type] || PROCESS_TYPES.custom).leadDays;
+    const due = processDue(p) <= lead;
+    if (due && p.type === "inject_reminder" && p.meta && p.meta.injectId) {
+      const inj = state.injections.find((x) => x.id === p.meta.injectId);
+      if (inj && inj.given) inj.given = false;
+    }
+    if (due && p.type === "fertilise" && p.meta && p.meta.fertId) {
+      const f = state.fertReminders.find((x) => x.id === p.meta.fertId);
+      if (f && f.done) f.done = false;
+    }
+    return due;
+  }
   function buildQueue() {
     const items = [];
-    state.planner.forEach((p) => {
-      const d = daysUntil(p.when);
-      if (d <= 14) {
-        items.push({
-          id: "q-plant-" + p.id,
-          title: p.what,
-          meta: p.where + " · " + fmtDate(p.when),
-          severity: d <= 2 ? "red" : d <= 7 ? "amber" : "green",
-          due: d,
-          action: "crops",
-          icon: "🌾",
-        });
-      }
-    });
-    state.fertReminders.filter((f) => !f.done).forEach((f) => {
-      const d = daysUntil(f.dueAt);
-      if (d <= 14) {
-        items.push({
-          id: "q-fert-" + f.id,
-          title: "Fertilise: " + f.label,
-          meta: f.field + " · " + fmtDate(f.dueAt),
-          severity: d <= 3 ? "amber" : "green",
-          due: d,
-          action: "crops",
-          icon: "🪴",
-        });
-      }
-    });
-    state.grazing.filter((g) => g.status === "active").forEach((g) => {
-      const d = daysUntil(g.nextMove);
-      if (d <= 7) {
-        items.push({
-          id: "q-graze-" + g.id,
-          title: "Graze move — " + g.kamp,
-          meta: g.herd + " · " + fmtDate(g.nextMove),
-          severity: d <= 1 ? "red" : "amber",
-          due: d,
-          action: "animals",
-          icon: "🐄",
-        });
-      }
-    });
-    state.injections.filter((i) => !i.given).forEach((i) => {
-      const d = daysUntil(i.dueAt);
-      if (d <= 14) {
-        items.push({
-          id: "q-inj-" + i.id,
-          title: "Inject reminder: " + i.label,
-          meta: "Due " + fmtDate(i.dueAt) + " · no dosage — confirm with vet",
-          severity: d < 0 ? "red" : d <= 3 ? "amber" : "green",
-          due: d,
-          action: "animals",
-          icon: "💉",
-        });
-      }
-    });
-    state.repairs.filter((r) => r.status === "open").forEach((r) => {
+    (state.processes || []).filter(processInQueue).forEach((p) => {
+      const due = processDue(p);
+      const def = PROCESS_TYPES[p.type] || PROCESS_TYPES.custom;
       items.push({
-        id: "q-rep-" + r.id,
-        title: "Repair: " + r.asset,
-        meta: r.issue,
-        severity: "amber",
-        due: daysUntil(r.at),
-        action: "infra",
-        icon: "🔧",
+        id: "q-" + p.id,
+        processId: p.id,
+        title: p.title,
+        meta: (def.label || p.type) + " · due " + fmtDate(p.nextDue) + (p.accountLinks && p.accountLinks.length ? " · link" : ""),
+        severity: due < 0 ? "red" : due <= 3 ? "amber" : "green",
+        due,
+        action: p.module || "home",
+        icon: def.icon || "◎",
       });
-    });
-    if (!state.payrollApproved) {
-      items.push({
-        id: "q-hr",
-        title: "HR — Approve payroll",
-        meta: state.workers.length + " people · skof wages",
-        severity: "amber",
-        due: 2,
-        action: "hr",
-        icon: "👥",
-      });
-    }
-    state.todos.filter((t) => !t.done).forEach((t) => {
-      const d = daysUntil(t.due);
-      if (d <= 5) {
-        items.push({
-          id: "q-td-" + t.id,
-          title: t.text,
-          meta: (t.source === "auto" ? "Auto · " : "") + fmtDate(t.due),
-          severity: d <= 0 ? "red" : "amber",
-          due: d,
-          action: "todo",
-          icon: "✓",
-        });
-      }
     });
     items.sort((a, b) => a.due - b.due || a.title.localeCompare(b.title));
     return items;
@@ -431,19 +530,32 @@
     $("#today-count").innerHTML = '<span class="dot"></span> ' + q.length + " due";
     $("#today-queue").innerHTML =
       q.length === 0
-        ? '<div class="empty">Nothing urgent — lekker.</div>'
+        ? '<div class="empty">Nothing due — all processes ahead of lead window. Add one below.</div>'
         : q
-            .slice(0, 10)
-            .map((item) =>
-              rowHTML({
-                icon: item.icon,
-                title: item.title,
-                meta: item.meta,
-                severity: item.severity,
-                action: item.action,
-                right: '<span class="badge ' + (item.severity === "red" ? "danger" : item.severity === "amber" ? "warn" : "ok") + '">' + (item.due < 0 ? "overdue" : item.due === 0 ? "today" : item.due + "d") + "</span>",
-              })
-            )
+            .slice(0, 12)
+            .map((item) => {
+              const badge =
+                '<span class="badge ' +
+                (item.severity === "red" ? "danger" : item.severity === "amber" ? "warn" : "ok") +
+                '">' +
+                (item.due < 0 ? "overdue" : item.due === 0 ? "today" : item.due + "d") +
+                "</span>";
+              return (
+                '<button type="button" class="row sev-' +
+                item.severity +
+                '" data-process="' +
+                item.processId +
+                '"><div class="row-icon">' +
+                item.icon +
+                '</div><div class="row-body"><div class="row-title">' +
+                escapeHtml(item.title) +
+                '</div><div class="row-meta">' +
+                escapeHtml(item.meta) +
+                '</div></div><div class="row-right">' +
+                badge +
+                "</div></button>"
+              );
+            })
             .join("");
 
     $("#weather-snap").innerHTML = [
@@ -475,6 +587,30 @@
           severity: a.sev === "info" ? "teal" : a.sev,
           action: a.action,
         })
+      )
+      .join("");
+
+    renderHistoryPanel($("#history-panel"), 5);
+  }
+
+  function renderHistoryPanel(el, limit) {
+    if (!el) return;
+    const hist = (state.history || []).slice(0, limit || 8);
+    if (!hist.length) {
+      el.innerHTML = '<div class="empty">No completions yet — run a process from the queue</div>';
+      return;
+    }
+    el.innerHTML = hist
+      .map(
+        (h) =>
+          '<div class="history-item"><div><strong>' +
+          escapeHtml(h.title) +
+          '</strong> · done</div><div class="h-meta">' +
+          fmtDate(h.completedAt) +
+          " · next " +
+          fmtDate(h.nextDueSet) +
+          (h.note ? " · " + escapeHtml(h.note) : "") +
+          "</div></div>"
       )
       .join("");
   }
@@ -1024,6 +1160,36 @@
       " ha total · " +
       state.farm.grazingHa +
       " ha grazing (sample)";
+
+    const pl = $("#process-list");
+    if (pl) {
+      const procs = state.processes || [];
+      pl.innerHTML =
+        procs
+          .map((p) => {
+            const def = PROCESS_TYPES[p.type] || PROCESS_TYPES.custom;
+            const links = (p.accountLinks || []).map((a) => a.label).join(", ") || "no account link";
+            return (
+              '<button type="button" class="row" data-edit-process="' +
+              p.id +
+              '"><div class="row-icon">' +
+              def.icon +
+              '</div><div class="row-body"><div class="row-title">' +
+              escapeHtml(p.title) +
+              '</div><div class="row-meta">' +
+              escapeHtml(def.label) +
+              " · every " +
+              p.cadenceDays +
+              "d · next " +
+              fmtDate(p.nextDue) +
+              " · " +
+              escapeHtml(links) +
+              '</div></div><div class="row-right"><span class="badge muted">Edit</span></div></button>'
+            );
+          })
+          .join("") || '<div class="empty">No processes — add one</div>';
+    }
+    renderHistoryPanel($("#history-list-full"), 20);
   }
 
   function render() {
@@ -1044,7 +1210,437 @@
     else if (currentView === "settings") renderSettings();
   }
 
-  function resetDemo() {
+
+  /* ── ProcessRunner ── */
+  let prState = null;
+
+  function getProcess(id) {
+    return (state.processes || []).find((p) => p.id === id);
+  }
+
+  function prPhases(proc) {
+    const def = PROCESS_TYPES[proc.type] || PROCESS_TYPES.custom;
+    const steps = def.steps || [];
+    return ["start"].concat(steps.map(function (_, i) { return "step:" + i; })).concat(["done", "nextdue"]);
+  }
+
+  function openProcessRunner(processId) {
+    const proc = getProcess(processId);
+    if (!proc) {
+      toast("Process not found");
+      return;
+    }
+    prState = { processId: processId, phaseIndex: 0, answers: {}, checks: {} };
+    $("#process-runner").classList.add("open");
+    $("#process-runner").setAttribute("aria-hidden", "false");
+    renderProcessRunner();
+  }
+
+  function closeProcessRunner() {
+    prState = null;
+    $("#process-runner").classList.remove("open");
+    $("#process-runner").setAttribute("aria-hidden", "true");
+  }
+
+  function suggestNextDue(proc) {
+    const days = Number(proc.cadenceDays) || (PROCESS_TYPES[proc.type] || PROCESS_TYPES.custom).defaultCadenceDays || 30;
+    if (!days) return isoDate(addDays(new Date(), 30));
+    return isoDate(addDays(new Date(), days));
+  }
+
+  function renderAccountLinks(proc) {
+    const links = proc.accountLinks || [];
+    if (!links.length) {
+      return '<div class="pr-card"><p style="font-size:12px;color:var(--muted)">No account link yet — add vet WhatsApp / supplier in Settings → Recurring processes.</p></div>';
+    }
+    return (
+      '<div class="pr-card"><h4>Account links</h4>' +
+      links
+        .map(function (a) {
+          return (
+            '<button type="button" class="pr-link-btn" data-open-link="' +
+            escapeHtml(a.url) +
+            '"><span>Open account · ' +
+            escapeHtml(a.label) +
+            "</span><span>↗</span></button>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
+  function renderProcessRunner() {
+    if (!prState) return;
+    const proc = getProcess(prState.processId);
+    if (!proc) return closeProcessRunner();
+    const def = PROCESS_TYPES[proc.type] || PROCESS_TYPES.custom;
+    const phases = prPhases(proc);
+    const phase = phases[prState.phaseIndex];
+    $("#pr-title").textContent = proc.title;
+    $("#pr-badge").textContent = prState.phaseIndex + 1 + "/" + phases.length;
+    $("#pr-stepper").innerHTML = phases
+      .map(function (_, i) {
+        return '<span class="' + (i < prState.phaseIndex ? "done" : i === prState.phaseIndex ? "on" : "") + '"></span>';
+      })
+      .join("");
+
+    const body = $("#pr-body");
+    const actions = $("#pr-actions");
+    let html = "";
+    let act = "";
+
+    if (phase === "start") {
+      html =
+        '<div class="pr-phase-label">Start</div><div class="pr-title">' +
+        escapeHtml(proc.title) +
+        '</div><div class="pr-meta">' +
+        escapeHtml(def.label) +
+        " · due " +
+        fmtDate(proc.nextDue) +
+        " · cadence every " +
+        proc.cadenceDays +
+        ' days</div><div class="pr-card"><h4>What happens</h4><p>Guided process (' +
+        def.steps.length +
+        " steps). On complete you set the next due — item returns to Home when that date approaches.</p><p style=\"margin-top:8px;font-size:12px;color:var(--muted)\">" +
+        escapeHtml(def.disclaimer || "") +
+        "</p></div>" +
+        renderAccountLinks(proc);
+      act =
+        '<button type="button" class="btn btn-ghost" id="pr-cancel">Cancel</button><button type="button" class="btn btn-primary" id="pr-next">Start →</button>';
+    } else if (phase.indexOf("step:") === 0) {
+      const si = Number(phase.split(":")[1]);
+      const step = def.steps[si];
+      html =
+        '<div class="pr-phase-label">Step ' +
+        (si + 1) +
+        " of " +
+        def.steps.length +
+        '</div><div class="pr-title">' +
+        escapeHtml(step.title) +
+        '</div><div class="pr-meta">' +
+        escapeHtml(step.body) +
+        "</div>";
+      if (step.key === "product" || step.key === "animals" || si === 1) html += renderAccountLinks(proc);
+      if (step.input === "product") {
+        html +=
+          '<div class="form-row"><label>Product (user-entered)</label><input type="text" id="pr-product" placeholder="Brand / product you used" value="' +
+          escapeHtml(prState.answers.product || "") +
+          '" /></div>';
+      }
+      if (step.input === "note") {
+        html +=
+          '<div class="form-row"><label>Notes</label><textarea id="pr-note" placeholder="Observation…">' +
+          escapeHtml(prState.answers.note || "") +
+          "</textarea></div>";
+      }
+      if (step.checks) {
+        html +=
+          '<div class="pr-card">' +
+          step.checks
+            .map(function (c, i) {
+              const k = si + "-" + i;
+              return (
+                '<label class="pr-check"><input type="checkbox" data-pr-check="' +
+                k +
+                '" ' +
+                (prState.checks[k] ? "checked" : "") +
+                " /><span>" +
+                escapeHtml(c) +
+                "</span></label>"
+              );
+            })
+            .join("") +
+          "</div>";
+      }
+      html += '<p style="font-size:11px;color:var(--muted);margin-top:8px">' + escapeHtml(def.disclaimer || "") + "</p>";
+      act =
+        '<button type="button" class="btn btn-ghost" id="pr-back">Back</button><button type="button" class="btn btn-primary" id="pr-next">Continue →</button>';
+    } else if (phase === "done") {
+      html =
+        '<div class="pr-done-hero"><div class="big">✓</div><h4>Marked done</h4><p class="pr-meta">' +
+        escapeHtml(proc.title) +
+        ' complete for this cycle.</p></div><div class="pr-card"><h4>Next</h4><p>Set next expiry / due so this returns to Home automatically.</p></div>';
+      act =
+        '<button type="button" class="btn btn-ghost" id="pr-back">Back</button><button type="button" class="btn btn-primary" id="pr-next">Set next due →</button>';
+    } else if (phase === "nextdue") {
+      const suggested = prState.suggestedNext || suggestNextDue(proc);
+      prState.suggestedNext = suggested;
+      html =
+        '<div class="pr-phase-label">Next due</div><div class="pr-title">When should this return?</div><div class="pr-meta">Suggested from cadence (every ' +
+        proc.cadenceDays +
+        ' days).</div><div class="form-row"><label>Next due date</label><input type="date" id="pr-next-due" value="' +
+        suggested +
+        '" /></div><div class="form-row"><label>Cadence (days)</label><input type="number" id="pr-cadence" value="' +
+        proc.cadenceDays +
+        '" min="0" /></div><div class="form-row"><label>Note (optional)</label><input type="text" id="pr-final-note" value="' +
+        escapeHtml(prState.answers.note || prState.answers.product || "") +
+        '" placeholder="e.g. Applied / logged" /></div><div class="pr-card"><p style="font-size:12px;color:var(--muted)">Reappears in Home within lead window (' +
+        (proc.leadDays != null ? proc.leadDays : def.leadDays) +
+        " days). NOT vet/tax/legal advice.</p></div>";
+      act =
+        '<button type="button" class="btn btn-ghost" id="pr-back">Back</button><button type="button" class="btn btn-primary" id="pr-finish">Confirm &amp; close</button>';
+    }
+
+    body.innerHTML = html;
+    actions.innerHTML = act;
+
+    $("#pr-cancel") && $("#pr-cancel").addEventListener("click", closeProcessRunner);
+    $("#pr-back") &&
+      $("#pr-back").addEventListener("click", function () {
+        if (prState.phaseIndex > 0) {
+          prState.phaseIndex--;
+          renderProcessRunner();
+        }
+      });
+    $("#pr-next") &&
+      $("#pr-next").addEventListener("click", function () {
+        if (!validatePrStep(proc, phase, def)) return;
+        capturePrAnswers();
+        prState.phaseIndex++;
+        renderProcessRunner();
+      });
+    $("#pr-finish") &&
+      $("#pr-finish").addEventListener("click", function () {
+        finishProcess(proc);
+      });
+    body.querySelectorAll("[data-pr-check]").forEach(function (el) {
+      el.addEventListener("change", function () {
+        prState.checks[el.getAttribute("data-pr-check")] = el.checked;
+      });
+    });
+    body.querySelectorAll("[data-open-link]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const url = btn.getAttribute("data-open-link");
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
+      });
+    });
+  }
+
+  function validatePrStep(proc, phase, def) {
+    if (phase.indexOf("step:") !== 0) return true;
+    const si = Number(phase.split(":")[1]);
+    const step = def.steps[si];
+    if (step.input === "product") {
+      const el = document.getElementById("pr-product");
+      if (el && !el.value.trim()) {
+        toast("Enter the product you used");
+        return false;
+      }
+    }
+    if (step.checks) {
+      for (let i = 0; i < step.checks.length; i++) {
+        if (!prState.checks[si + "-" + i]) {
+          toast("Tick all confirmations to continue");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function capturePrAnswers() {
+    const p = document.getElementById("pr-product");
+    if (p) prState.answers.product = p.value.trim();
+    const n = document.getElementById("pr-note");
+    if (n) prState.answers.note = n.value.trim();
+  }
+
+  function finishProcess(proc) {
+    const nextEl = document.getElementById("pr-next-due");
+    const cadEl = document.getElementById("pr-cadence");
+    const noteEl = document.getElementById("pr-final-note");
+    const nextDue = (nextEl && nextEl.value) || suggestNextDue(proc);
+    const cadence = Math.max(0, Number(cadEl && cadEl.value) || proc.cadenceDays);
+    const note = (noteEl && noteEl.value.trim()) || prState.answers.note || prState.answers.product || "";
+
+    proc.nextDue = nextDue;
+    proc.cadenceDays = cadence || proc.cadenceDays;
+    proc.lastCompletedAt = isoDate(new Date());
+
+    if (proc.type === "fertilise" && proc.meta && proc.meta.fertId) {
+      const f = state.fertReminders.find(function (x) { return x.id === proc.meta.fertId; });
+      if (f) {
+        f.done = true;
+        f.dueAt = nextDue;
+      }
+    }
+    if (proc.type === "inject_reminder" && proc.meta && proc.meta.injectId) {
+      const inj = state.injections.find(function (x) { return x.id === proc.meta.injectId; });
+      if (inj) {
+        inj.given = true;
+        inj.product = prState.answers.product || inj.product || "";
+        inj.dueAt = nextDue;
+        state.treatmentLog.unshift({
+          id: uid("tl"),
+          injectId: inj.id,
+          label: inj.label,
+          product: inj.product,
+          note: note,
+          at: isoDate(new Date()),
+        });
+      }
+    }
+    if (proc.type === "soil_check") {
+      state.soilLogs.unshift({
+        id: uid("sl"),
+        fieldId: (proc.meta && proc.meta.fieldId) || "f1",
+        fieldName: (proc.meta && proc.meta.fieldName) || "Kamp",
+        moisture: "Logged via process",
+        note: note || "Soil check complete",
+        at: isoDate(new Date()),
+      });
+    }
+    if (proc.type === "repair_close" && proc.meta && proc.meta.repairId) {
+      const r = state.repairs.find(function (x) { return x.id === proc.meta.repairId; });
+      if (r) r.status = "done";
+      if (!cadence) proc.paused = true;
+    }
+    if (proc.type === "graze_move" && proc.meta && proc.meta.grazeId) {
+      const g = state.grazing.find(function (x) { return x.id === proc.meta.grazeId; });
+      if (g) g.nextMove = nextDue;
+    }
+    if (proc.type === "plant_window" && proc.meta && proc.meta.plannerId) {
+      const p = state.planner.find(function (x) { return x.id === proc.meta.plannerId; });
+      if (p) p.when = nextDue;
+    }
+
+    state.history = state.history || [];
+    state.history.unshift({
+      id: uid("h"),
+      processId: proc.id,
+      title: proc.title,
+      type: proc.type,
+      completedAt: isoDate(new Date()),
+      nextDueSet: nextDue,
+      note: note,
+    });
+    if (state.history.length > 50) state.history.length = 50;
+
+    save();
+    closeProcessRunner();
+    render();
+    toast("Done · next due " + fmtDate(nextDue));
+  }
+
+  function openAddProcessModal(editId) {
+    const editing = editId ? getProcess(editId) : null;
+    const types = Object.keys(PROCESS_TYPES)
+      .map(function (k) {
+        return (
+          '<option value="' +
+          k +
+          '" ' +
+          (editing && editing.type === k ? "selected" : "") +
+          ">" +
+          escapeHtml(PROCESS_TYPES[k].label) +
+          "</option>"
+        );
+      })
+      .join("");
+    openModal(
+      editing ? "Edit process" : "Add recurring process",
+      '<div class="form-row"><label>Title</label><input type="text" id="np-title" value="' +
+        (editing ? escapeHtml(editing.title) : "") +
+        '" placeholder="e.g. Fertilise Kamp Oos" /></div>' +
+        '<div class="form-row"><label>Process type</label><select id="np-type">' +
+        types +
+        '</select></div>' +
+        '<div class="form-row"><label>Next due</label><input type="date" id="np-due" value="' +
+        (editing ? editing.nextDue : isoDate(addDays(new Date(), 7))) +
+        '" /></div>' +
+        '<div class="form-row"><label>Cadence (days)</label><input type="number" id="np-cadence" min="0" value="' +
+        (editing ? editing.cadenceDays : 30) +
+        '" /></div>' +
+        '<div class="form-row"><label>Lead days</label><input type="number" id="np-lead" min="0" value="' +
+        (editing ? editing.leadDays : 7) +
+        '" /></div>' +
+        '<div class="form-row"><label>Account link label</label><input type="text" id="np-link-label" value="' +
+        (editing && editing.accountLinks && editing.accountLinks[0] ? escapeHtml(editing.accountLinks[0].label) : "") +
+        '" placeholder="e.g. Vet WhatsApp" /></div>' +
+        '<div class="form-row"><label>Account link URL</label><input type="url" id="np-link-url" value="' +
+        (editing && editing.accountLinks && editing.accountLinks[0] ? escapeHtml(editing.accountLinks[0].url) : "") +
+        '" placeholder="https://… or wa.me/…" /></div>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-block" id="np-save">' +
+        (editing ? "Save" : "Add process") +
+        "</button></div>" +
+        (editing
+          ? '<button type="button" class="btn btn-danger btn-block" id="np-run" style="margin-top:8px">Run wizard now</button><button type="button" class="btn btn-ghost btn-block" id="np-delete" style="margin-top:8px">Delete process</button>'
+          : "") +
+        '<p style="font-size:11px;color:var(--muted);margin-top:10px">NOT vet/tax/legal advice. Links open in a new tab — no OAuth.</p>'
+    );
+    setTimeout(function () {
+      $("#np-save") &&
+        $("#np-save").addEventListener("click", function () {
+          const title = $("#np-title").value.trim();
+          const type = $("#np-type").value;
+          const nextDue = $("#np-due").value || isoDate(addDays(new Date(), 7));
+          const cadenceDays = Math.max(0, Number($("#np-cadence").value) || 30);
+          const leadDays = Math.max(0, Number($("#np-lead").value) || 7);
+          const label = $("#np-link-label").value.trim();
+          const url = $("#np-link-url").value.trim();
+          if (!title) {
+            toast("Enter a title");
+            return;
+          }
+          const links = label && url ? [{ label: label, url: url }] : url ? [{ label: "Open account", url: url }] : label ? [{ label: label, url: "#" }] : [];
+          const moduleGuess =
+            type === "fertilise" || type === "soil_check" || type === "plant_window"
+              ? "crops"
+              : type === "inject_reminder" || type === "graze_move"
+                ? "animals"
+                : type === "repair_close"
+                  ? "infra"
+                  : type === "stock_take"
+                    ? "stock"
+                    : "home";
+          if (editing) {
+            editing.title = title;
+            editing.type = type;
+            editing.nextDue = nextDue;
+            editing.cadenceDays = cadenceDays;
+            editing.leadDays = leadDays;
+            editing.accountLinks = links.length ? links : editing.accountLinks || [];
+            editing.module = moduleGuess;
+          } else {
+            state.processes.unshift({
+              id: uid("pr"),
+              type: type,
+              title: title,
+              nextDue: nextDue,
+              cadenceDays: cadenceDays,
+              leadDays: leadDays,
+              module: moduleGuess,
+              accountLinks: links,
+              meta: {},
+            });
+          }
+          save();
+          closeModal();
+          render();
+          toast(editing ? "Process updated" : "Process added");
+        });
+      $("#np-run") &&
+        $("#np-run").addEventListener("click", function () {
+          closeModal();
+          openProcessRunner(editing.id);
+        });
+      $("#np-delete") &&
+        $("#np-delete").addEventListener("click", function () {
+          if (!confirm("Delete this process?")) return;
+          state.processes = state.processes.filter(function (p) {
+            return p.id !== editing.id;
+          });
+          save();
+          closeModal();
+          render();
+          toast("Process deleted");
+        });
+    }, 0);
+  }
+
+
+    function resetDemo() {
     if (!confirm("Reset all Farm Desk demo data?")) return;
     localStorage.removeItem(STORAGE_KEY);
     state = seed();
@@ -1063,6 +1659,18 @@
           e.preventDefault();
           showView(nav);
         }
+      }
+      const procBtn = e.target.closest("[data-process]");
+      if (procBtn) {
+        e.preventDefault();
+        openProcessRunner(procBtn.getAttribute("data-process"));
+        return;
+      }
+      const editProc = e.target.closest("[data-edit-process]");
+      if (editProc) {
+        e.preventDefault();
+        openAddProcessModal(editProc.getAttribute("data-edit-process"));
+        return;
       }
       const goto = e.target.closest("[data-goto]");
       if (goto) {
@@ -1314,6 +1922,9 @@
     $("#modal").addEventListener("click", (e) => {
       if (e.target.id === "modal") closeModal();
     });
+    $("#pr-close")?.addEventListener("click", closeProcessRunner);
+    $("#btn-add-process")?.addEventListener("click", () => openAddProcessModal());
+    $("#btn-add-process-home")?.addEventListener("click", () => openAddProcessModal());
   }
 
   bind();

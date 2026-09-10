@@ -6,6 +6,10 @@ Demo / sample data only. **NOT** veterinary advice. **NOT** legal, tax or financ
 
 Shared DNA with [Life Desk](https://esteprinsloo101-web.github.io/life-desk/) and [Garage Desk](https://esteprinsloo101-web.github.io/garage-desk/): the app **reminds, prepares, logs**; human **Approves** money / animal health / legal.
 
+## Guided processes (not checklists)
+
+Home queue items are **actionable processes** (fertilise, inject reminder log, soil check, stock take, repair close, graze move). Tap → **ProcessRunner** wizard → Done → set next due. Account links (vet WhatsApp, supplier) open from the wizard. Add/edit in **Settings**.
+
 ## Live URL
 
 **https://esteprinsloo101-web.github.io/farm-desk/**

@@ -5,7 +5,134 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "farm-desk-v2";
+  const STORAGE_KEY = "farm-desk-v4";
+
+  /* PLATFORM_BAR_2026_09_11 */
+  const SCIENCE_TIPS = [
+  {
+    "h": "Soil moisture log streak",
+    "body": "Log moisture on 2 camps after each rain for 2 weeks. Compare plant stress notes.",
+    "method": "Method: paired field notes \u00b7 Limit: not a lab soil test"
+  },
+  {
+    "h": "Grazing rest days",
+    "body": "Add 3 rest days on one camp this rotation. Note recovery vs neighbour camp.",
+    "method": "Method: simple A/B rest \u00b7 Limit: rainfall dominates"
+  },
+  {
+    "h": "Injection reminder hygiene",
+    "body": "Confirm product name only after your vet advises. Desk stores your note \u2014 not a dose.",
+    "method": "Method: record-keeping \u00b7 Limit: NOT veterinary advice"
+  }
+];
+  const PURPOSE_MODULE_PRESETS = {
+  "farm": {
+    "crops": true,
+    "animals": true,
+    "money": true,
+    "weather": true,
+    "stock": true,
+    "monitor": true,
+    "infra": true,
+    "admin": true,
+    "contacts": true,
+    "legal": true,
+    "hr": true,
+    "todo": true,
+    "science": true
+  },
+  "household": {
+    "crops": false,
+    "animals": false,
+    "money": true,
+    "weather": true,
+    "stock": true,
+    "monitor": false,
+    "infra": true,
+    "admin": true,
+    "contacts": true,
+    "legal": false,
+    "hr": false,
+    "todo": true,
+    "science": true
+  },
+  "trade": {
+    "crops": false,
+    "animals": false,
+    "money": true,
+    "weather": false,
+    "stock": true,
+    "monitor": false,
+    "infra": true,
+    "admin": true,
+    "contacts": true,
+    "legal": false,
+    "hr": true,
+    "todo": true,
+    "science": true
+  },
+  "rentals": {
+    "crops": false,
+    "animals": false,
+    "money": true,
+    "weather": false,
+    "stock": false,
+    "monitor": false,
+    "infra": true,
+    "admin": true,
+    "contacts": true,
+    "legal": true,
+    "hr": false,
+    "todo": true,
+    "science": true
+  },
+  "stokvel": {
+    "crops": false,
+    "animals": false,
+    "money": true,
+    "weather": false,
+    "stock": false,
+    "monitor": false,
+    "infra": false,
+    "admin": true,
+    "contacts": true,
+    "legal": false,
+    "hr": false,
+    "todo": true,
+    "science": true
+  },
+  "flood": {
+    "crops": true,
+    "animals": true,
+    "money": false,
+    "weather": true,
+    "stock": false,
+    "monitor": true,
+    "infra": true,
+    "admin": false,
+    "contacts": true,
+    "legal": false,
+    "hr": false,
+    "todo": true,
+    "science": true
+  },
+  "decisions": {
+    "crops": true,
+    "animals": true,
+    "money": true,
+    "weather": true,
+    "stock": false,
+    "monitor": false,
+    "infra": false,
+    "admin": true,
+    "contacts": false,
+    "legal": true,
+    "hr": false,
+    "todo": true,
+    "science": true
+  }
+};
+
   const TZ = "Africa/Johannesburg";
 
   /* ── Process types (guided wizards, not checklists) ── */
@@ -116,6 +243,8 @@
         hectares: 420,
         grazingHa: 280,
       },
+      modules: { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true },
+      profile: { onboarded: false, city: "Free State · Highveld", purpose: "farm", updatedAt: null },
       fields: [
         { id: "f1", name: "Kamp Noord", ha: 45, crop: "Maize", status: "vegetative" },
         { id: "f2", name: "Kamp Suid", ha: 38, crop: "Sunflower", status: "planted" },
@@ -379,6 +508,8 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return seed();
       const data = JSON.parse(raw);
+      if (!data.profile) data.profile = { onboarded: false, city: (data.farm && data.farm.region) || "", purpose: "farm", updatedAt: null };
+      if (!data.modules) data.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true };
       if (!Array.isArray(data.processes) || !data.processes.length) {
         data.processes = seedProcesses(startOfDay(new Date()));
       }
@@ -860,9 +991,11 @@
       { nav: "legal", icon: "⚖", title: "Legal", meta: "Permits · POPIA · checklist" },
       { nav: "hr", icon: "👥", title: "HR & people", meta: "Roster · skof · payroll" },
       { nav: "todo", icon: "✓", title: "To-do", meta: "Farm-wide tasks" },
-      { nav: "settings", icon: "⚙", title: "Settings", meta: "Reset demo" },
+      { nav: "science", icon: "🔬", title: "Science Desk", meta: "Weekly tips · not vet advice" },
+      { nav: "settings", icon: "⚙", title: "Settings", meta: "Location · purpose · reset" },
     ];
     $("#more-grid").innerHTML = items
+      .filter((m) => m.nav === "settings" || m.nav === "science" || !state.modules || state.modules[m.nav] !== false)
       .map(
         (m) =>
           '<button type="button" class="more-item" data-nav="' +
@@ -1150,6 +1283,22 @@
   }
 
   function renderSettings() {
+    const settingsView = document.getElementById("view-settings");
+    if (settingsView && !document.getElementById("profile-card")) {
+      const card = document.createElement("div");
+      card.className = "card mb-12";
+      card.id = "profile-card";
+      card.innerHTML = '<div class="card-head"><h3>Location &amp; purpose</h3><span class="badge teal">adapt</span></div><p id="profile-summary" style="font-size:15px;color:var(--text-dim);margin-bottom:10px"></p><button type="button" class="btn btn-ghost btn-block" id="btn-redo-onboard">Change city / purpose</button>';
+      const first = settingsView.querySelector(".card, .toggle-list, #module-toggles");
+      if (first) {
+        const wrap = first.closest(".card") || first;
+        settingsView.insertBefore(card, wrap);
+      } else settingsView.insertBefore(card, settingsView.firstChild);
+      document.getElementById("btn-redo-onboard").addEventListener("click", function () { state.profile.onboarded = false; save(); showOnboarding(); });
+    }
+    const ps = document.getElementById("profile-summary");
+    if (ps && state.profile) ps.textContent = (state.profile.city || "—") + " · " + (state.profile.purpose || "—");
+
     $("#settings-farm").innerHTML =
       "<strong>" +
       escapeHtml(state.farm.name) +
@@ -1207,7 +1356,73 @@
     else if (currentView === "legal") renderLegal();
     else if (currentView === "hr") renderHR();
     else if (currentView === "todo") renderTodo();
-    else if (currentView === "settings") renderSettings();
+    else if (currentView === "science") renderScience();
+    if (currentView === "settings") renderSettings();
+  }
+
+
+  
+  /* PLATFORM_BAR_2026_09_11 helpers */
+  function renderScience() {
+    const root = document.getElementById("science-tips");
+    if (!root) return;
+    root.innerHTML = SCIENCE_TIPS.map((t) =>
+      '<div class="science-tip"><h4>' + escapeHtml(t.h) + '</h4><p>' + escapeHtml(t.body) + '</p><div class="method">' + escapeHtml(t.method) + '</div></div>'
+    ).join("");
+  }
+
+  function applyPurposeModules(purpose) {
+    const preset = PURPOSE_MODULE_PRESETS[purpose];
+    if (!preset || !state.modules) return;
+    Object.keys(state.modules).forEach((k) => {
+      if (Object.prototype.hasOwnProperty.call(preset, k)) state.modules[k] = !!preset[k];
+    });
+  }
+
+  function updateBrandLocation() {
+    const sub = document.querySelector(".brand-text p");
+    if (!sub || !state.profile) return;
+    const city = state.profile.city || "";
+    const purpose = state.profile.purpose || "";
+    if (city || purpose) sub.textContent = [city, purpose].filter(Boolean).join(" · ");
+  }
+
+  function showOnboarding() {
+    const el = document.getElementById("onboard");
+    if (!el) return;
+    const city = document.getElementById("ob-city");
+    const purpose = document.getElementById("ob-purpose");
+    if (city && state.profile) city.value = state.profile.city || "Free State \u00b7 Highveld";
+    if (purpose && state.profile) purpose.value = state.profile.purpose || "farm";
+    el.classList.add("open");
+    el.setAttribute("aria-hidden", "false");
+  }
+
+  function hideOnboarding() {
+    const el = document.getElementById("onboard");
+    if (!el) return;
+    el.classList.remove("open");
+    el.setAttribute("aria-hidden", "true");
+  }
+
+  function completeOnboarding() {
+    const city = (document.getElementById("ob-city") && document.getElementById("ob-city").value || "").trim();
+    const purpose = (document.getElementById("ob-purpose") && document.getElementById("ob-purpose").value) || "";
+    if (!city) { toast("Enter your city / region"); return; }
+    if (!purpose) { toast("Choose what you run"); return; }
+    state.profile = { onboarded: true, city: city, purpose: purpose, updatedAt: new Date().toISOString() };
+    applyPurposeModules(purpose);
+    save();
+    hideOnboarding();
+    updateBrandLocation();
+    render();
+    toast("Saved · modules adapted");
+  }
+
+  function maybeOnboard() {
+    if (!state.profile) state.profile = { onboarded: false, city: "", purpose: "", updatedAt: null };
+    if (!state.profile.onboarded) showOnboarding();
+    else updateBrandLocation();
   }
 
 
@@ -1928,5 +2143,7 @@
   }
 
   bind();
+  document.getElementById("ob-save") && document.getElementById("ob-save").addEventListener("click", completeOnboarding);
+  maybeOnboard();
   render();
 })();

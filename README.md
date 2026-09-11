@@ -78,3 +78,6 @@ Files: `index.html` · `styles.css` · `app.js` · `README.md`
 ## Disclaimer
 
 Demo / sample data only. Not veterinary, legal, tax, financial or agronomist advice. Farm Desk does not prescribe medicines, fertiliser rates, or file compliance for you. Confirm real-world decisions with qualified professionals and official channels.
+
+## Update 2026-09-11
+Platform bar 2026-09-11: Science Desk (not vet), elderly UI, location+purpose onboarding. Coming: coach experiments.

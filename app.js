@@ -234,6 +234,16 @@
   };
 
 
+  function defaultPrefs() {
+    return {
+      quietStart: 21,
+      quietEnd: 7,
+      notificationsEnabled: true,
+      lastNotified: {},
+      installDismissed: false,
+    };
+  }
+
   function seed() {
     const today = startOfDay(new Date());
     return {
@@ -391,58 +401,68 @@
       contactFilter: "all",
       processes: seedProcesses(today),
       history: [],
+      prefs: defaultPrefs(),
+      pipeline: {
+        cropsPlantDone: false,
+        cropsFertDone: false,
+        cropsSoilDone: false,
+        animalsGrazeDone: false,
+        animalsInjectDone: false,
+        adminStockDone: false,
+        adminRepairDone: false,
+      },
     };
   }
 
   function seedProcesses(today) {
     return [
       {
-        id: "pr-fert1", type: "fertilise", title: "Top-dress N — Kamp Noord",
-        nextDue: isoDate(addDays(today, 5)), cadenceDays: 45, leadDays: 7, module: "crops",
-        accountLinks: [{ label: "Feed / fert co-op", url: "https://www.google.com/search?q=Highveld+Feed+Co-op" }],
-        meta: { fertId: "fr1", field: "Kamp Noord" },
-      },
-      {
         id: "pr-plant3", type: "plant_window", title: "Sunflower scout — Kamp Suid",
         nextDue: isoDate(addDays(today, 2)), cadenceDays: 21, leadDays: 5, module: "crops",
         accountLinks: [{ label: "Seed merchant FS", url: "https://www.google.com/search?q=Free+State+seed+merchant" }],
-        meta: { plannerId: "p3" },
+        meta: { plannerId: "p3", loopKey: "crops-suid", field: "Kamp Suid" },
       },
       {
-        id: "pr-inj2", type: "inject_reminder", title: "Sheep — seasonal parasite reminder",
-        nextDue: isoDate(addDays(today, 1)), cadenceDays: 90, leadDays: 7, module: "animals",
-        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
-        meta: { injectId: "inj2" },
-      },
-      {
-        id: "pr-inj4", type: "inject_reminder", title: "Pigs — herd health schedule reminder",
-        nextDue: isoDate(addDays(today, -2)), cadenceDays: 60, leadDays: 7, module: "animals",
-        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
-        meta: { injectId: "inj4" },
+        id: "pr-fert1", type: "fertilise", title: "Top-dress N — Kamp Noord",
+        nextDue: isoDate(addDays(today, 5)), cadenceDays: 45, leadDays: 7, module: "crops",
+        accountLinks: [{ label: "Feed / fert co-op", url: "https://www.google.com/search?q=Highveld+Feed+Co-op" }],
+        meta: { fertId: "fr1", field: "Kamp Noord", fieldId: "f1", loopKey: "crops-noord" },
       },
       {
         id: "pr-soil", type: "soil_check", title: "Soil check — Kamp Noord",
-        nextDue: isoDate(addDays(today, 2)), cadenceDays: 14, leadDays: 3, module: "crops",
+        nextDue: isoDate(addDays(today, 8)), cadenceDays: 14, leadDays: 3, module: "crops",
         accountLinks: [],
-        meta: { fieldId: "f1", fieldName: "Kamp Noord" },
-      },
-      {
-        id: "pr-stock", type: "stock_take", title: "Monthly stock take",
-        nextDue: isoDate(addDays(today, 4)), cadenceDays: 30, leadDays: 5, module: "stock",
-        accountLinks: [{ label: "Farm chandlery", url: "https://www.google.com/search?q=farm+chandlery+Bloemfontein" }],
-        meta: {},
-      },
-      {
-        id: "pr-rep1", type: "repair_close", title: "Repair: West boundary fence",
-        nextDue: isoDate(today), cadenceDays: 0, leadDays: 60, module: "infra",
-        accountLinks: [{ label: "Supplier — fence gear", url: "https://www.google.com/search?q=fence+droppers+supplier" }],
-        meta: { repairId: "r1" },
+        meta: { fieldId: "f1", fieldName: "Kamp Noord", loopKey: "crops-noord" },
       },
       {
         id: "pr-graze1", type: "graze_move", title: "Graze move — Weiding A (cattle)",
         nextDue: isoDate(addDays(today, 3)), cadenceDays: 14, leadDays: 5, module: "animals",
         accountLinks: [],
-        meta: { grazeId: "g1" },
+        meta: { grazeId: "g1", loopKey: "animals-cattle" },
+      },
+      {
+        id: "pr-inj2", type: "inject_reminder", title: "Sheep — seasonal parasite reminder",
+        nextDue: isoDate(addDays(today, 1)), cadenceDays: 90, leadDays: 7, module: "animals",
+        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
+        meta: { injectId: "inj2", loopKey: "animals-sheep" },
+      },
+      {
+        id: "pr-inj4", type: "inject_reminder", title: "Pigs — herd health schedule reminder",
+        nextDue: isoDate(addDays(today, -2)), cadenceDays: 60, leadDays: 7, module: "animals",
+        accountLinks: [{ label: "Vet WhatsApp (Dr Naidoo)", url: "https://wa.me/27510000001" }],
+        meta: { injectId: "inj4", loopKey: "animals-pigs" },
+      },
+      {
+        id: "pr-stock", type: "stock_take", title: "Monthly stock take",
+        nextDue: isoDate(addDays(today, 4)), cadenceDays: 30, leadDays: 5, module: "stock",
+        accountLinks: [{ label: "Farm chandlery", url: "https://www.google.com/search?q=farm+chandlery+Bloemfontein" }],
+        meta: { loopKey: "admin-ops" },
+      },
+      {
+        id: "pr-rep1", type: "repair_close", title: "Repair: West boundary fence",
+        nextDue: isoDate(today), cadenceDays: 0, leadDays: 60, module: "infra",
+        accountLinks: [{ label: "Supplier — fence gear", url: "https://www.google.com/search?q=fence+droppers+supplier" }],
+        meta: { repairId: "r1", loopKey: "admin-ops" },
       },
     ];
   }
@@ -514,6 +534,18 @@
         data.processes = seedProcesses(startOfDay(new Date()));
       }
       if (!Array.isArray(data.history)) data.history = [];
+      data.prefs = Object.assign(defaultPrefs(), data.prefs || {});
+      if (!data.pipeline) {
+        data.pipeline = {
+          cropsPlantDone: false,
+          cropsFertDone: false,
+          cropsSoilDone: false,
+          animalsGrazeDone: false,
+          animalsInjectDone: false,
+          adminStockDone: false,
+          adminRepairDone: false,
+        };
+      }
       return data;
     } catch {
       return seed();
@@ -521,6 +553,10 @@
   }
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  function getPrefs() {
+    if (!state.prefs) state.prefs = defaultPrefs();
+    return state.prefs;
   }
 
   let state = load();
@@ -582,6 +618,239 @@
     });
     alerts.push({ title: "Frost risk window (sample)", meta: "Highveld late winter / early spring — watch tender crops", sev: "info", action: "weather" });
     return alerts;
+  }
+
+  /* ── reminders v1 + ops loops ── */
+  function inQuietHours(date) {
+    const prefs = getPrefs();
+    const h = (date || new Date()).getHours();
+    const start = Number(prefs.quietStart);
+    const end = Number(prefs.quietEnd);
+    if (Number.isNaN(start) || Number.isNaN(end)) return false;
+    if (start === end) return false;
+    if (start < end) return h >= start && h < end;
+    return h >= start || h < end;
+  }
+  function nextOutsideQuiet(from) {
+    const d = new Date(from || Date.now());
+    let guard = 0;
+    while (inQuietHours(d) && guard < 48) {
+      d.setMinutes(0, 0, 0);
+      d.setHours(d.getHours() + 1);
+      guard++;
+    }
+    return d;
+  }
+  function notifPermission() {
+    if (!("Notification" in window)) return "unsupported";
+    return Notification.permission;
+  }
+  function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+      toast("Notifications not supported here");
+      return Promise.resolve("unsupported");
+    }
+    if (Notification.permission === "granted") return Promise.resolve("granted");
+    if (Notification.permission === "denied") {
+      toast("Notifications blocked — enable in browser settings if you want alerts");
+      return Promise.resolve("denied");
+    }
+    return Notification.requestPermission()
+      .then(function (perm) {
+        if (perm === "granted") toast("Notifications on");
+        else if (perm === "denied") toast("Notifications denied — in-app reminders still work");
+        else toast("Notifications not enabled");
+        render();
+        return perm;
+      })
+      .catch(function () {
+        toast("Could not request notifications");
+        return "denied";
+      });
+  }
+  function fireDueNotification(item) {
+    const prefs = getPrefs();
+    if (!prefs.notificationsEnabled) return;
+    if (notifPermission() !== "granted") return;
+    if (inQuietHours(new Date())) return;
+    const key = item.processId || item.id;
+    const today = isoDate(new Date());
+    if (prefs.lastNotified[key] === today) return;
+    try {
+      const n = new Notification("Farm Desk · due", {
+        body: item.title + (item.due < 0 ? " (overdue)" : item.due === 0 ? " (today)" : " · in " + item.due + "d"),
+        tag: "farm-desk-" + key,
+        icon: "icons/icon-192.png",
+      });
+      prefs.lastNotified[key] = today;
+      save();
+      n.onclick = function () {
+        window.focus();
+        if (item.processId) openProcessRunner(item.processId);
+        n.close();
+      };
+    } catch (e) { /* graceful */ }
+  }
+  function checkDueNotifications() {
+    const prefs = getPrefs();
+    if (!prefs.notificationsEnabled) return;
+    if (notifPermission() !== "granted") return;
+    if (inQuietHours(new Date())) return;
+    buildQueue()
+      .filter(function (item) { return item.due <= 0; })
+      .slice(0, 3)
+      .forEach(fireDueNotification);
+  }
+  var reminderTimers = {};
+  function clearReminderTimer(processId) {
+    if (reminderTimers[processId]) {
+      clearTimeout(reminderTimers[processId]);
+      delete reminderTimers[processId];
+    }
+  }
+  function scheduleReminderForProcess(proc) {
+    if (!proc || !proc.nextDue) return;
+    clearReminderTimer(proc.id);
+    const prefs = getPrefs();
+    if (!prefs.notificationsEnabled) return;
+    if (notifPermission() !== "granted") return;
+    const dueDay = startOfDay(parseISO(proc.nextDue));
+    const lead = proc.leadDays != null ? proc.leadDays : (PROCESS_TYPES[proc.type] || PROCESS_TYPES.custom).leadDays;
+    let fireAt = addDays(dueDay, -Math.min(lead, 1));
+    fireAt.setHours(8, 0, 0, 0);
+    fireAt = nextOutsideQuiet(fireAt);
+    const delay = fireAt.getTime() - Date.now();
+    if (delay <= 0) {
+      const soon = nextOutsideQuiet(new Date(Date.now() + 1500));
+      const d2 = soon.getTime() - Date.now();
+      if (d2 < 86400000) {
+        reminderTimers[proc.id] = setTimeout(function () {
+          fireDueNotification({ processId: proc.id, id: proc.id, title: proc.title, due: processDue(proc) });
+        }, Math.max(500, d2));
+      }
+      return;
+    }
+    if (delay > 2147483647) return;
+    reminderTimers[proc.id] = setTimeout(function () {
+      fireDueNotification({ processId: proc.id, id: proc.id, title: proc.title, due: processDue(proc) });
+    }, delay);
+  }
+  function rescheduleAllReminders() {
+    (state.processes || []).forEach(scheduleReminderForProcess);
+  }
+  function buildReminders() {
+    const q = buildQueue().slice(0, 8);
+    const base = new Date();
+    const quietNow = inQuietHours(base);
+    return q.map(function (item, i) {
+      let fire = new Date(base);
+      fire.setMinutes(0, 0, 0);
+      if (item.due <= 0) {
+        fire = nextOutsideQuiet(new Date(base.getTime() + (quietNow ? 0 : 60 * 1000)));
+      } else {
+        fire = addDays(startOfDay(base), Math.max(0, item.due));
+        fire.setHours(8 + (i % 3), i % 2 === 0 ? 0 : 30, 0, 0);
+        fire = nextOutsideQuiet(fire);
+      }
+      const time = fire.toLocaleTimeString("en-ZA", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
+      const day = fire.toLocaleDateString("en-ZA", { timeZone: TZ, weekday: "short", day: "numeric", month: "short" });
+      return {
+        when: day + " · " + time,
+        title: item.title,
+        src: (item.action || "ops") + (quietNow && item.due <= 0 ? " · quiet hours" : ""),
+        processId: item.processId,
+        due: item.due,
+        quietShifted: quietNow && item.due <= 0,
+      };
+    });
+  }
+
+  function syncPipelineFromState() {
+    const hist = state.history || [];
+    const prev = state.pipeline || {};
+    state.pipeline = {
+      cropsPlantDone: !!(prev.cropsPlantDone || hist.some(function (h) { return h.type === "plant_window"; })),
+      cropsFertDone: !!(prev.cropsFertDone || hist.some(function (h) { return h.type === "fertilise"; })),
+      cropsSoilDone: !!(prev.cropsSoilDone || hist.some(function (h) { return h.type === "soil_check"; })),
+      animalsGrazeDone: !!(prev.animalsGrazeDone || hist.some(function (h) { return h.type === "graze_move"; })),
+      animalsInjectDone: !!(prev.animalsInjectDone || hist.some(function (h) { return h.type === "inject_reminder"; })),
+      adminStockDone: !!(prev.adminStockDone || hist.some(function (h) { return h.type === "stock_take"; })),
+      adminRepairDone: !!(prev.adminRepairDone || hist.some(function (h) { return h.type === "repair_close"; })),
+    };
+    return state.pipeline;
+  }
+  function renderLoopTrack(el, steps) {
+    if (!el) return;
+    el.innerHTML = steps.map(function (s) {
+      const cls = s.done ? "done" : s.open ? "open" : "blocked";
+      const stateTxt = s.done ? "Done" : s.open ? "Due" : "Next";
+      return '<div class="loop-step ' + cls + '"><div class="ls-label">' + escapeHtml(s.label) + '</div><div class="ls-state">' + stateTxt + '</div></div>';
+    }).join("");
+  }
+  function renderOpsLoops() {
+    const L = syncPipelineFromState();
+    const q = buildQueue();
+    const hasType = function (t) { return q.some(function (i) {
+      const p = getProcess(i.processId);
+      return p && p.type === t;
+    }); };
+    renderLoopTrack($("#loop-track-crops"), [
+      { label: "Plant/scout", done: L.cropsPlantDone, open: hasType("plant_window") },
+      { label: "Fertilise", done: L.cropsFertDone, open: hasType("fertilise") || (L.cropsPlantDone && !L.cropsFertDone) },
+      { label: "Soil check", done: L.cropsSoilDone, open: hasType("soil_check") || (L.cropsFertDone && !L.cropsSoilDone) },
+    ]);
+    renderLoopTrack($("#loop-track-animals"), [
+      { label: "Graze move", done: L.animalsGrazeDone, open: hasType("graze_move") },
+      { label: "Inject log", done: L.animalsInjectDone, open: hasType("inject_reminder") || (L.animalsGrazeDone && !L.animalsInjectDone) },
+    ]);
+    renderLoopTrack($("#loop-track-admin"), [
+      { label: "Stock take", done: L.adminStockDone, open: hasType("stock_take") },
+      { label: "Repair close", done: L.adminRepairDone, open: hasType("repair_close") || (L.adminStockDone && !L.adminRepairDone) },
+    ]);
+  }
+  function ensureFollowOnProcess(fromProc, nextType, title, overrides) {
+    const loopKey = (fromProc.meta && fromProc.meta.loopKey) || null;
+    let existing = (state.processes || []).find(function (p) {
+      if (p.type !== nextType) return false;
+      if (loopKey && p.meta && p.meta.loopKey === loopKey) return true;
+      if (!loopKey && overrides && overrides.injectId && p.meta && p.meta.injectId === overrides.injectId) return true;
+      if (!loopKey && overrides && overrides.repairId && p.meta && p.meta.repairId === overrides.repairId) return true;
+      if (!loopKey && overrides && overrides.fieldId && p.meta && p.meta.fieldId === overrides.fieldId) return true;
+      return false;
+    });
+    const today = isoDate(new Date());
+    if (existing) {
+      existing.nextDue = today;
+      existing.paused = false;
+      if (title) existing.title = title;
+      Object.assign(existing.meta || (existing.meta = {}), overrides || {});
+      if (loopKey) existing.meta.loopKey = loopKey;
+      return existing;
+    }
+    const def = PROCESS_TYPES[nextType] || PROCESS_TYPES.custom;
+    const moduleGuess =
+      nextType === "fertilise" || nextType === "soil_check" || nextType === "plant_window"
+        ? "crops"
+        : nextType === "inject_reminder" || nextType === "graze_move"
+          ? "animals"
+          : nextType === "repair_close"
+            ? "infra"
+            : nextType === "stock_take"
+              ? "stock"
+              : "home";
+    const created = {
+      id: uid("pr"),
+      type: nextType,
+      title: title || (def.label + " · follow-on"),
+      nextDue: today,
+      cadenceDays: def.defaultCadenceDays || 14,
+      leadDays: def.leadDays || 3,
+      module: moduleGuess,
+      accountLinks: (fromProc.accountLinks || []).slice(),
+      meta: Object.assign({ loopKey: loopKey }, overrides || {}),
+    };
+    state.processes.unshift(created);
+    return created;
   }
 
   /* ── UI helpers ── */
@@ -720,6 +989,42 @@
         })
       )
       .join("");
+
+    renderOpsLoops();
+    const rem = buildReminders();
+    const rp = $("#reminder-panel");
+    const rb = $("#reminder-badge");
+    if (rb) rb.textContent = rem.length ? rem.length + " queued" : "auto";
+    if (rp) {
+      rp.innerHTML = rem.length
+        ? rem
+            .map(function (r) {
+              return (
+                '<button type="button" class="reminder-item ' +
+                (r.due <= 0 ? "due-now" : "") +
+                '" ' +
+                (r.processId ? 'data-process="' + r.processId + '"' : "") +
+                '><div class="r-time">' +
+                escapeHtml(r.when) +
+                '</div><div class="r-body">' +
+                escapeHtml(r.title) +
+                '<div class="r-src ' +
+                (r.quietShifted ? "quiet" : "") +
+                '">' +
+                escapeHtml(r.src) +
+                "</div></div></button>"
+              );
+            })
+            .join("")
+        : '<div class="empty">No scheduled reminders</div>';
+    }
+    const en = $("#btn-enable-notifs");
+    if (en) {
+      const perm = notifPermission();
+      if (perm === "granted" && getPrefs().notificationsEnabled) en.textContent = "Notifications on";
+      else if (perm === "denied") en.textContent = "Notifications blocked — in-app queue still works";
+      else en.textContent = "Enable notifications";
+    }
 
     renderHistoryPanel($("#history-panel"), 5);
   }
@@ -1339,6 +1644,23 @@
           .join("") || '<div class="empty">No processes — add one</div>';
     }
     renderHistoryPanel($("#history-list-full"), 20);
+
+    const prefs = getPrefs();
+    const qs = $("#quiet-start");
+    const qe = $("#quiet-end");
+    const pn = $("#pref-notifs");
+    if (qs && document.activeElement !== qs) qs.value = String(prefs.quietStart);
+    if (qe && document.activeElement !== qe) qe.value = String(prefs.quietEnd);
+    if (pn) pn.checked = !!prefs.notificationsEnabled;
+    const ns = $("#notif-status");
+    if (ns) {
+      const perm = notifPermission();
+      ns.textContent =
+        "Permission: " +
+        perm +
+        (prefs.notificationsEnabled ? " · alerts enabled" : " · alerts off") +
+        (inQuietHours(new Date()) ? " · quiet hours now" : "");
+    }
   }
 
   function render() {
@@ -1732,7 +2054,51 @@
     });
     if (state.history.length > 50) state.history.length = 50;
 
+    if (!state.pipeline) state.pipeline = {};
+    if (proc.type === "plant_window") {
+      state.pipeline.cropsPlantDone = true;
+      const field = (proc.meta && (proc.meta.field || proc.meta.fieldName)) || "kamp";
+      ensureFollowOnProcess(proc, "fertilise", "Fertilise follow-on — " + field, {
+        field: field,
+        fieldId: proc.meta && proc.meta.fieldId,
+      });
+    }
+    if (proc.type === "fertilise") {
+      state.pipeline.cropsFertDone = true;
+      const fieldName = (proc.meta && (proc.meta.field || proc.meta.fieldName)) || "Kamp";
+      ensureFollowOnProcess(proc, "soil_check", "Soil check after fertilise — " + fieldName, {
+        fieldId: (proc.meta && proc.meta.fieldId) || "f1",
+        fieldName: fieldName,
+      });
+    }
+    if (proc.type === "soil_check") {
+      state.pipeline.cropsSoilDone = true;
+    }
+    if (proc.type === "graze_move") {
+      state.pipeline.animalsGrazeDone = true;
+      ensureFollowOnProcess(proc, "inject_reminder", "Health reminder after graze move", {
+        injectId: (proc.meta && proc.meta.injectId) || "inj1",
+      });
+    }
+    if (proc.type === "inject_reminder") {
+      state.pipeline.animalsInjectDone = true;
+    }
+    if (proc.type === "stock_take") {
+      state.pipeline.adminStockDone = true;
+      const openRepair = (state.repairs || []).find(function (r) { return r.status === "open"; });
+      if (openRepair) {
+        ensureFollowOnProcess(proc, "repair_close", "Repair after stock take — " + openRepair.asset, {
+          repairId: openRepair.id,
+        });
+      }
+    }
+    if (proc.type === "repair_close") {
+      state.pipeline.adminRepairDone = true;
+    }
+
+    syncPipelineFromState();
     save();
+    scheduleReminderForProcess(proc);
     closeProcessRunner();
     render();
     toast("Done · next due " + fmtDate(nextDue));
@@ -1832,6 +2198,8 @@
           }
           save();
           closeModal();
+          if (editing) scheduleReminderForProcess(editing);
+          else scheduleReminderForProcess(state.processes[0]);
           render();
           toast(editing ? "Process updated" : "Process added");
         });
@@ -1843,6 +2211,7 @@
       $("#np-delete") &&
         $("#np-delete").addEventListener("click", function () {
           if (!confirm("Delete this process?")) return;
+          clearReminderTimer(editing.id);
           state.processes = state.processes.filter(function (p) {
             return p.id !== editing.id;
           });
@@ -1855,13 +2224,16 @@
   }
 
 
-    function resetDemo() {
+  function resetDemo() {
     if (!confirm("Reset all Farm Desk demo data?")) return;
+    Object.keys(reminderTimers).forEach(clearReminderTimer);
     localStorage.removeItem(STORAGE_KEY);
     state = seed();
     save();
-    toast("Demo reset");
     showView("home");
+    updateInstallBanner();
+    rescheduleAllReminders();
+    toast("Demo reset");
   }
 
   /* ── events ── */
@@ -2128,7 +2500,8 @@
       openModal(
         "About Farm Desk",
         "<p><strong>Plaas Sonder Naam · Free State / Highveld</strong> sample farm.</p>" +
-          "<p>Mobile-first static demo. Faceless SA ZAR. Data in localStorage.</p>" +
+          "<p>Mobile-first static demo. Faceless SA ZAR. Installable PWA · JSON backup in Settings.</p>" +
+          "<p>ProcessRunner loops: <strong>crops (plant → fertilise → soil)</strong>, <strong>livestock (graze → inject log)</strong>, <strong>admin (stock take → repair)</strong>.</p>" +
           "<p><strong>NOT</strong> veterinary advice. <strong>NOT</strong> legal, tax or financial advice. <strong>NOT</strong> an agronomist prescription. Injection module is reminder + user-entered product log only — no dosages.</p>" +
           "<p>Confirm all real decisions with a qualified vet, agronomist, lawyer or accountant.</p>"
       );
@@ -2144,6 +2517,217 @@
 
   bind();
   document.getElementById("ob-save") && document.getElementById("ob-save").addEventListener("click", completeOnboarding);
+
+  /* ── backup export / import ── */
+  function collectExportPayload() {
+    return {
+      app: "farm-desk",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      keys: {
+        [STORAGE_KEY]: state,
+      },
+    };
+  }
+  function exportJson() {
+    const payload = collectExportPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "farm-desk-backup-" + isoDate(new Date()) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast("Exported JSON backup");
+  }
+  function applyImportPayload(data) {
+    if (!data || typeof data !== "object") throw new Error("Invalid file");
+    let next = null;
+    if (data.keys && data.keys[STORAGE_KEY]) next = data.keys[STORAGE_KEY];
+    else if (data.state && typeof data.state === "object") next = data.state;
+    else if (data.processes || data.modules || data.farm) next = data;
+    else if (data.keys) {
+      const vals = Object.keys(data.keys);
+      if (vals.length === 1) next = data.keys[vals[0]];
+    }
+    if (!next || typeof next !== "object") throw new Error("No Farm Desk state in file");
+    if (!next.modules) next.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true };
+    next.prefs = Object.assign(defaultPrefs(), next.prefs || {});
+    if (!Array.isArray(next.processes)) next.processes = seedProcesses(startOfDay(new Date()));
+    if (!Array.isArray(next.history)) next.history = [];
+    if (!next.profile) next.profile = { onboarded: false, city: "", purpose: "farm", updatedAt: null };
+    if (!next.pipeline) {
+      next.pipeline = {
+        cropsPlantDone: false,
+        cropsFertDone: false,
+        cropsSoilDone: false,
+        animalsGrazeDone: false,
+        animalsInjectDone: false,
+        adminStockDone: false,
+        adminRepairDone: false,
+      };
+    }
+    Object.keys(reminderTimers).forEach(clearReminderTimer);
+    state = next;
+    save();
+    rescheduleAllReminders();
+    render();
+    updateInstallBanner();
+    toast("Import complete");
+  }
+  function importJsonFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const data = JSON.parse(String(reader.result || ""));
+        applyImportPayload(data);
+      } catch (err) {
+        toast("Import failed — check JSON");
+      }
+    };
+    reader.onerror = function () { toast("Could not read file"); };
+    reader.readAsText(file);
+  }
+
+  /* ── PWA install affordance ── */
+  var deferredInstall = null;
+  function updateInstallBanner() {
+    const banner = $("#install-banner");
+    if (!banner) return;
+    const prefs = getPrefs();
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (standalone || prefs.installDismissed) {
+      banner.classList.add("hidden");
+      return;
+    }
+    if (deferredInstall) {
+      banner.classList.remove("hidden");
+      const btn = $("#btn-install");
+      if (btn) btn.textContent = "Install";
+    } else {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS && !prefs.installDismissed) {
+        banner.classList.remove("hidden");
+        const btn = $("#btn-install");
+        if (btn) btn.textContent = "How to";
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+  }
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferredInstall = e;
+    updateInstallBanner();
+  });
+  window.addEventListener("appinstalled", function () {
+    deferredInstall = null;
+    getPrefs().installDismissed = true;
+    save();
+    updateInstallBanner();
+    toast("Farm Desk installed");
+  });
+
+  $("#btn-install") && $("#btn-install").addEventListener("click", function () {
+    if (deferredInstall) {
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(function (choice) {
+        deferredInstall = null;
+        if (choice && choice.outcome === "accepted") {
+          getPrefs().installDismissed = true;
+          save();
+        }
+        updateInstallBanner();
+      });
+      return;
+    }
+    openModal(
+      "Add to Home Screen",
+      '<p style="font-size:15px;line-height:1.55">On iPhone/iPad: Safari → Share → <strong>Add to Home Screen</strong>.</p>' +
+        '<p style="font-size:15px;line-height:1.55;margin-top:8px">On Android Chrome: menu → <strong>Install app</strong> / Add to Home screen.</p>' +
+        '<p style="font-size:13px;color:var(--muted);margin-top:10px">Offline shell caches index, app.js, styles, and manifest. NOT veterinary, legal, tax or agronomist advice.</p>'
+    );
+  });
+  $("#btn-install-dismiss") && $("#btn-install-dismiss").addEventListener("click", function () {
+    getPrefs().installDismissed = true;
+    save();
+    updateInstallBanner();
+  });
+
+  $("#btn-enable-notifs") && $("#btn-enable-notifs").addEventListener("click", function () {
+    getPrefs().notificationsEnabled = true;
+    save();
+    requestNotificationPermission().then(function () {
+      checkDueNotifications();
+      rescheduleAllReminders();
+    });
+  });
+  $("#btn-request-notifs") && $("#btn-request-notifs").addEventListener("click", function () {
+    getPrefs().notificationsEnabled = true;
+    save();
+    requestNotificationPermission().then(function () {
+      checkDueNotifications();
+      rescheduleAllReminders();
+      render();
+    });
+  });
+  $("#pref-notifs") && $("#pref-notifs").addEventListener("change", function (e) {
+    getPrefs().notificationsEnabled = !!e.target.checked;
+    save();
+    if (e.target.checked) {
+      requestNotificationPermission().then(function () { rescheduleAllReminders(); });
+    } else {
+      Object.keys(reminderTimers).forEach(clearReminderTimer);
+      toast("Reminder alerts off — queue still shows on Home");
+    }
+    render();
+  });
+  function saveQuietFromInputs() {
+    const prefs = getPrefs();
+    const qs = $("#quiet-start");
+    const qe = $("#quiet-end");
+    if (qs) {
+      let v = Math.max(0, Math.min(23, Number(qs.value)));
+      if (Number.isNaN(v)) v = 21;
+      prefs.quietStart = v;
+    }
+    if (qe) {
+      let v = Math.max(0, Math.min(23, Number(qe.value)));
+      if (Number.isNaN(v)) v = 7;
+      prefs.quietEnd = v;
+    }
+    save();
+    rescheduleAllReminders();
+    toast("Quiet hours saved");
+    render();
+  }
+  $("#quiet-start") && $("#quiet-start").addEventListener("change", saveQuietFromInputs);
+  $("#quiet-end") && $("#quiet-end").addEventListener("change", saveQuietFromInputs);
+
+  $("#btn-export-json") && $("#btn-export-json").addEventListener("click", exportJson);
+  $("#btn-import-json") && $("#btn-import-json").addEventListener("click", function () {
+    const f = $("#import-file");
+    if (f) f.click();
+  });
+  $("#import-file") && $("#import-file").addEventListener("change", function (e) {
+    const file = e.target.files && e.target.files[0];
+    importJsonFile(file);
+    e.target.value = "";
+  });
+
+  /* boot */
   maybeOnboard();
   render();
+  updateInstallBanner();
+  rescheduleAllReminders();
+  checkDueNotifications();
+  setInterval(function () {
+    checkDueNotifications();
+  }, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") checkDueNotifications();
+  });
 })();

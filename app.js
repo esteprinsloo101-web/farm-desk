@@ -6,25 +6,6 @@
   "use strict";
 
   const STORAGE_KEY = "farm-desk-v4";
-
-  /* PLATFORM_BAR_2026_09_11 */
-  const SCIENCE_TIPS = [
-  {
-    "h": "Soil moisture log streak",
-    "body": "Log moisture on 2 camps after each rain for 2 weeks. Compare plant stress notes.",
-    "method": "Method: paired field notes \u00b7 Limit: not a lab soil test"
-  },
-  {
-    "h": "Grazing rest days",
-    "body": "Add 3 rest days on one camp this rotation. Note recovery vs neighbour camp.",
-    "method": "Method: simple A/B rest \u00b7 Limit: rainfall dominates"
-  },
-  {
-    "h": "Injection reminder hygiene",
-    "body": "Confirm product name only after your vet advises. Desk stores your note \u2014 not a dose.",
-    "method": "Method: record-keeping \u00b7 Limit: NOT veterinary advice"
-  }
-];
   const PURPOSE_MODULE_PRESETS = {
   "farm": {
     "crops": true,
@@ -38,9 +19,8 @@
     "contacts": true,
     "legal": true,
     "hr": true,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "household": {
     "crops": false,
     "animals": false,
@@ -53,9 +33,8 @@
     "contacts": true,
     "legal": false,
     "hr": false,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "trade": {
     "crops": false,
     "animals": false,
@@ -68,9 +47,8 @@
     "contacts": true,
     "legal": false,
     "hr": true,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "rentals": {
     "crops": false,
     "animals": false,
@@ -83,9 +61,8 @@
     "contacts": true,
     "legal": true,
     "hr": false,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "stokvel": {
     "crops": false,
     "animals": false,
@@ -98,9 +75,8 @@
     "contacts": true,
     "legal": false,
     "hr": false,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "flood": {
     "crops": true,
     "animals": true,
@@ -113,9 +89,8 @@
     "contacts": true,
     "legal": false,
     "hr": false,
-    "todo": true,
-    "science": true
-  },
+    "todo": true
+      },
   "decisions": {
     "crops": true,
     "animals": true,
@@ -128,9 +103,8 @@
     "contacts": false,
     "legal": true,
     "hr": false,
-    "todo": true,
-    "science": true
-  }
+    "todo": true
+      }
 };
 
   const TZ = "Africa/Johannesburg";
@@ -253,7 +227,7 @@
         hectares: 420,
         grazingHa: 280,
       },
-      modules: { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true },
+      modules: { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true },
       profile: { onboarded: false, city: "Free State · Highveld", purpose: "farm", updatedAt: null },
       fields: [
         { id: "f1", name: "Kamp Noord", ha: 45, crop: "Maize", status: "vegetative" },
@@ -529,7 +503,7 @@
       if (!raw) return seed();
       const data = JSON.parse(raw);
       if (!data.profile) data.profile = { onboarded: false, city: (data.farm && data.farm.region) || "", purpose: "farm", updatedAt: null };
-      if (!data.modules) data.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true };
+      if (!data.modules) data.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true };
       if (!Array.isArray(data.processes) || !data.processes.length) {
         data.processes = seedProcesses(startOfDay(new Date()));
       }
@@ -1296,11 +1270,10 @@
       { nav: "legal", icon: "⚖", title: "Legal", meta: "Permits · POPIA · checklist" },
       { nav: "hr", icon: "👥", title: "HR & people", meta: "Roster · skof · payroll" },
       { nav: "todo", icon: "✓", title: "To-do", meta: "Farm-wide tasks" },
-      { nav: "science", icon: "🔬", title: "Science Desk", meta: "Weekly tips · not vet advice" },
       { nav: "settings", icon: "⚙", title: "Settings", meta: "Location · purpose · reset" },
     ];
     $("#more-grid").innerHTML = items
-      .filter((m) => m.nav === "settings" || m.nav === "science" || !state.modules || state.modules[m.nav] !== false)
+      .filter((m) => m.nav === "settings" || !state.modules || state.modules[m.nav] !== false)
       .map(
         (m) =>
           '<button type="button" class="more-item" data-nav="' +
@@ -1678,20 +1651,12 @@
     else if (currentView === "legal") renderLegal();
     else if (currentView === "hr") renderHR();
     else if (currentView === "todo") renderTodo();
-    else if (currentView === "science") renderScience();
     if (currentView === "settings") renderSettings();
   }
 
 
   
   /* PLATFORM_BAR_2026_09_11 helpers */
-  function renderScience() {
-    const root = document.getElementById("science-tips");
-    if (!root) return;
-    root.innerHTML = SCIENCE_TIPS.map((t) =>
-      '<div class="science-tip"><h4>' + escapeHtml(t.h) + '</h4><p>' + escapeHtml(t.body) + '</p><div class="method">' + escapeHtml(t.method) + '</div></div>'
-    ).join("");
-  }
 
   function applyPurposeModules(purpose) {
     const preset = PURPOSE_MODULE_PRESETS[purpose];
@@ -2553,7 +2518,7 @@
       if (vals.length === 1) next = data.keys[vals[0]];
     }
     if (!next || typeof next !== "object") throw new Error("No Farm Desk state in file");
-    if (!next.modules) next.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true, science: true };
+    if (!next.modules) next.modules = { crops: true, animals: true, money: true, weather: true, stock: true, monitor: true, infra: true, admin: true, contacts: true, legal: true, hr: true, todo: true };
     next.prefs = Object.assign(defaultPrefs(), next.prefs || {});
     if (!Array.isArray(next.processes)) next.processes = seedProcesses(startOfDay(new Date()));
     if (!Array.isArray(next.history)) next.history = [];

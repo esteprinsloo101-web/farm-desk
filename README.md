@@ -33,7 +33,6 @@ Home queue items are **actionable processes** (fertilise, inject reminder log, s
 | **Legal** | Licence renewal reminders, POPIA note, compliance checklist (**not legal advice**) |
 | **HR** | Roster, skof clock, leave, payroll **Approve** stub |
 | **To-do** | Farm-wide auto + manual tasks |
-| **Science Desk** | Weekly improve tips (methods + limits) — screening only, **not vet** |
 | **Settings** | Processes · quiet hours · notifications · export/import |
 
 Bottom nav: **Home | Crops | Animals | Money | More**
@@ -73,7 +72,6 @@ In **Settings → Backup**:
 - Soil / crop / animal logs persist in `localStorage`.
 - **Reset demo** from header ↺ or Settings.
 - COI-safe: no mining / chemicals / industrial environmental advisory content.
-- Science Desk tips stay **screening / methods + limits** — not veterinary advice.
 
 ## Open locally
 
@@ -97,7 +95,7 @@ Storage key: `farm-desk-v4`
 4. **Animals → Inject** — open a reminder, enter **your** product name, Mark given (no dosage fields).
 5. **Settings** — quiet hours; request notifications; **Export JSON** then **Import JSON**.
 6. DevTools → Application → Manifest + Service Worker (`farm-desk-shell-v1`); optional: go offline and confirm shell still loads.
-7. Keep **Science Desk** screening disclaimers (not vet) + elderly UI (large type / 48px taps) from platform bar.
+7. Keep elderly UI (large type / 48px taps) from platform bar.
 8. `curl -I https://esteprinsloo101-web.github.io/farm-desk/` after Pages deploy from `main`.
 
 ## Related
@@ -114,6 +112,6 @@ Demo / sample data only. Not veterinary, legal, tax, financial or agronomist adv
 
 ## Update 2026-09-11
 
-Platform bar: Science Desk (not vet), elderly UI, location+purpose onboarding.
+Platform bar: elderly UI, location+purpose onboarding.
 
-**feat/pwa-reminders-export:** PWA manifest + service worker shell cache (`farm-desk-shell-v1`), install affordance, reminders v1 (notifications + quiet hours + post-Done schedule), JSON export/import backup, stronger crops / livestock / admin ProcessRunner loops, Science Desk screening disclaimers kept.
+**feat/pwa-reminders-export:** PWA manifest + service worker shell cache (`farm-desk-shell-v1`), install affordance, reminders v1 (notifications + quiet hours + post-Done schedule), JSON export/import backup, stronger crops / livestock / admin ProcessRunner loops.

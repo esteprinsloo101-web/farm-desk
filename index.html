@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
-  <meta name="description" content="Farm Desk — SA farm ops demo for Free State / Highveld. Sample data only. NOT veterinary, legal, tax, financial or agronomist advice." />
+  <meta name="description" content="Farm Desk — free try of the live SA farm ops runner (Free State / Highveld). Buy unlock on Gumroad. Sample data only. NOT veterinary, legal, tax, financial or agronomist advice." />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Farm Desk" />
@@ -25,10 +25,19 @@
         </div>
       </div>
       <div class="header-actions">
-        <button type="button" class="icon-btn" id="btn-reset" title="Reset demo" aria-label="Reset demo">↺</button>
+        <button type="button" class="icon-btn" id="btn-reset" title="Reset sample data" aria-label="Reset sample data">↺</button>
         <button type="button" class="icon-btn" id="btn-info" title="About" aria-label="About">ℹ</button>
       </div>
     </header>
+
+    <div class="live-cta" role="region" aria-label="Free try · Buy live unlock on Gumroad">
+      <div class="live-cta-body">
+        <strong>Free try · Buy live unlock on Gumroad</strong>
+        <span>Farm Desk · R199</span>
+      </div>
+      <a class="btn btn-primary btn-sm" href="https://stofficial.gumroad.com/l/omrggs" target="_blank" rel="noopener noreferrer">Buy R199 ↗</a>
+      <p class="live-cta-foot">Also: <a href="https://stofficial.gumroad.com/l/ydbgne" target="_blank" rel="noopener noreferrer">Stokvel OS R99</a></p>
+    </div>
 
     <div class="install-banner hidden" id="install-banner" role="region" aria-label="Install app">
       <div class="install-banner-body">
@@ -46,7 +55,7 @@
       <section class="view active" id="view-home" data-view="home">
         <div class="view-title">
           <div>
-            <h2>Home</h2>
+            <h2>Today</h2>
             <p class="sub">Guided ops processes · <span id="today-date"></span></p>
           </div>
           <span class="badge teal" id="today-count"><span class="dot"></span> 0 due</span>
@@ -198,7 +207,7 @@
               <div class="calc-result" id="cap-result">—</div>
               <div style="font-size:12px;color:var(--muted);margin-top:6px" id="cap-compare"></div>
             </div>
-            <button type="button" class="btn btn-ghost btn-block" id="btn-cap-save" style="margin-top:10px">Save rate to demo table</button>
+            <button type="button" class="btn btn-ghost btn-block" id="btn-cap-save" style="margin-top:10px">Save rate to sample table</button>
           </div>
           <div class="card">
             <div class="card-head"><h3>Sample stocking rates</h3></div>
@@ -268,7 +277,7 @@
         </div>
         <div class="card kpi mb-12">
           <div class="stat-value teal" id="money-cash">R0</div>
-          <div class="stat-label">Cash overview (demo)</div>
+          <div class="stat-label">Cash overview (sample)</div>
         </div>
 
         <div class="card mb-12">
@@ -295,7 +304,7 @@
           </div>
         </div>
         <div class="more-grid" id="more-grid"></div>
-        <p class="disclaimer">Demo modules · Reset anytime from Settings or ↺</p>
+        <p class="disclaimer">Sample modules · Reset anytime from Settings or ↺</p>
       </section>
 
       <!-- WEATHER -->
@@ -465,7 +474,7 @@
         </div>
         <div class="card mb-12">
           <div class="card-head"><h3>POPIA note</h3></div>
-          <p style="font-size:13px;color:var(--text-dim)">Farm Desk demo stores sample ops data in your browser localStorage only. If you handle worker or buyer personal information in a real system, process it lawfully under POPIA — appoint an information officer where required, minimise data, and secure access. This note is educational, not legal advice.</p>
+          <p style="font-size:13px;color:var(--text-dim)">Farm Desk stores sample ops data in your browser localStorage only. If you handle worker or buyer personal information in a real system, process it lawfully under POPIA — appoint an information officer where required, minimise data, and secure access. This note is educational, not legal advice.</p>
         </div>
         <div class="card">
           <div class="card-head"><h3>Compliance checklist</h3><span class="badge muted">not legal advice</span></div>
@@ -599,8 +608,8 @@
         </div>
 
         <div class="card">
-          <div class="card-head"><h3>Demo</h3></div>
-          <button type="button" class="btn btn-danger btn-block" id="btn-reset-2">Reset all demo data</button>
+          <div class="card-head"><h3>Sample data</h3></div>
+          <button type="button" class="btn btn-danger btn-block" id="btn-reset-2">Reset all sample data</button>
         </div>
         <p class="disclaimer">localStorage key farm-desk-v4 · NOT veterinary / legal / tax / agronomist advice · Installable PWA · Injection module is reminder + user product log only.</p>
       </section>
@@ -608,7 +617,7 @@
     </main>
 
     <nav class="nav" id="bottom-nav" aria-label="Primary">
-      <button type="button" class="active" data-nav="home"><span class="nav-ico" aria-hidden="true">◎</span>Home</button>
+      <button type="button" class="active" data-nav="home"><span class="nav-ico" aria-hidden="true">◎</span>Today</button>
       <button type="button" data-nav="crops"><span class="nav-ico" aria-hidden="true">🌾</span>Crops</button>
       <button type="button" data-nav="animals"><span class="nav-ico" aria-hidden="true">🐄</span>Animals</button>
       <button type="button" data-nav="money"><span class="nav-ico" aria-hidden="true">R</span>Money</button>

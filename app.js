@@ -2190,7 +2190,7 @@
 
 
   function resetDemo() {
-    if (!confirm("Reset all Farm Desk demo data?")) return;
+    if (!confirm("Reset all Farm Desk sample data?")) return;
     Object.keys(reminderTimers).forEach(clearReminderTimer);
     localStorage.removeItem(STORAGE_KEY);
     state = seed();
@@ -2198,7 +2198,7 @@
     showView("home");
     updateInstallBanner();
     rescheduleAllReminders();
-    toast("Demo reset");
+    toast("Sample data reset");
   }
 
   /* ── events ── */
@@ -2465,7 +2465,7 @@
       openModal(
         "About Farm Desk",
         "<p><strong>Plaas Sonder Naam · Free State / Highveld</strong> sample farm.</p>" +
-          "<p>Mobile-first static demo. Faceless SA ZAR. Installable PWA · JSON backup in Settings.</p>" +
+          "<p>Free try of the live Gumroad farm ops runner. Faceless SA ZAR. Installable PWA · JSON backup in Settings. Buy unlock: <a href=\"https://stofficial.gumroad.com/l/omrggs\" target=\"_blank\" rel=\"noopener\">Gumroad R199</a>.</p>" +
           "<p>ProcessRunner loops: <strong>crops (plant → fertilise → soil)</strong>, <strong>livestock (graze → inject log)</strong>, <strong>admin (stock take → repair)</strong>.</p>" +
           "<p><strong>NOT</strong> veterinary advice. <strong>NOT</strong> legal, tax or financial advice. <strong>NOT</strong> an agronomist prescription. Injection module is reminder + user-entered product log only — no dosages.</p>" +
           "<p>Confirm all real decisions with a qualified vet, agronomist, lawyer or accountant.</p>"

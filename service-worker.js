@@ -1,5 +1,5 @@
 /* Farm Desk — shell cache for offline-ish PWA */
-const CACHE = "farm-desk-shell-v3";
+const CACHE = "farm-desk-shell-v4";
 const SHELL = [
   "./",
   "./index.html",

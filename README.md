@@ -74,7 +74,7 @@ In **Settings → Backup**:
 - Injection / vaccination module = **due-date reminders** + log that a dose was given (**user enters product name**). No invented drug dosages or medical protocols.
 - Soil / crop / animal logs persist in `localStorage`.
 - **Reset sample data** from header ↺ or Settings.
-- COI-safe: no mining / chemicals / industrial environmental advisory content.
+- Templates only. Not advice.
 
 ## Open locally
 
